@@ -64,7 +64,7 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
 
 ## To-Do List
 ### Phase 1: Project Setup & Planning
-- [ ] Initialize Git repository
+- [x] Initialize Git repository
 - [ ] Set up Vite + React project structure
 - [ ] Initialize Laravel backend project
 - [ ] Configure database connection (MySQL/PostgreSQL)
