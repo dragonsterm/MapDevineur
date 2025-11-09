@@ -66,13 +66,13 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
 ### Phase 1: Project Setup & Planning
 - [x] Initialize Git repository
 - [x] Set up Vite + React project structure
-- [ ] Initialize Laravel backend project
-- [ ] Configure database connection (MySQL/PostgreSQL)
+- [x] Initialize Laravel backend project
+- [x] Configure database connection (MySQL/PostgreSQL)
 - [x] Obtain Google Maps API key
-- [ ] Configure API key in both frontend and backend
-- [ ] Set up environment variables (.env files)
-- [ ] Install necessary dependencies (React Router, Axios, etc.)
-- [ ] Design database schema
+- [x] Configure API key in both frontend and backend
+- [x] Set up environment variables (.env files)
+- [x] Install necessary dependencies (React Router, Axios, etc.)
+- [x] Design database schema
 - [ ] Create UI/UX wireframes and mockups
 
 ### Phase 2: Database & Backend Setup
