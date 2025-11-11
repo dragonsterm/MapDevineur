@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import Test from './components/Test'
 
-function App() {
+function Home() {
   const [count, setCount] = useState(0)
 
   return (
@@ -25,10 +27,37 @@ function App() {
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
       </div>
+      <div className="card">
+        <Link to="/Test">
+          <button style={{
+            padding: '12px 24px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            fontWeight: '600',
+            cursor: 'pointer',
+            marginTop: '20px'
+          }}>
+            View GitHub Copilot Theme Test
+          </button>
+        </Link>
+      </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
     </>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/test" element={<Test />} />
+      </Routes>
+    </Router>
   )
 }
 
