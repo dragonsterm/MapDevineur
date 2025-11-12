@@ -31,7 +31,7 @@ function Home() {
         <Link to="/Test">
           <button style={{
             padding: '12px 24px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'blue',
             border: 'none',
             borderRadius: '8px',
             color: 'white',
@@ -39,7 +39,7 @@ function Home() {
             cursor: 'pointer',
             marginTop: '20px'
           }}>
-            View GitHub Copilot Theme Test
+            Theme Test
           </button>
         </Link>
       </div>
