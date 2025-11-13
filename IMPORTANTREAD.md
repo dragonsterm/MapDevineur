@@ -82,7 +82,7 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
 - [x] Define Tailwind color scheme and design tokens
 
 ### Phase 2: Database & Backend Setup
-- [ ] Create database migrations:
+- [x] Create database migrations:
   - Users table
   - Games table
   - Game rounds table
