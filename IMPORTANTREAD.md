@@ -99,7 +99,7 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
   - Get leaderboard endpoint
 - [x] Implement authentication middleware
 - [x] Set up CORS configuration
-- [ ] Test all API endpoints
+- [x] Test all API endpoints
 
 ### Phase 3: Frontend - Authentication
 - [ ] Create landing/home page with Tailwind styling
