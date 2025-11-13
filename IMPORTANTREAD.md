@@ -88,7 +88,7 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
   - Game rounds table
   - Locations table
   - Leaderboard/scores table
-- [ ] Seed locations table with 25 locations (coordinates + metadata)
+- [ ] Seed locations table with 25 locations (coordinates + metadata) (only 5 for now)
 - [ ] Create User model and authentication logic
 - [ ] Implement API routes:
   - User registration endpoint

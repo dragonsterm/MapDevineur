@@ -18,8 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
     ];
 
@@ -41,8 +40,17 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    // relationship
+    public function games()
+    {
+        return $this->hasMany(Game::class);
+    }
+
+    public function scores()
+    {
+        return $this->hasMany(Score::class);
     }
 }
