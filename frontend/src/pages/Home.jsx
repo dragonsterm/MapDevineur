@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../components/test.css';
 import './home.css';
+import useAuth from '../hooks/useAuth';
 
 function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
   const [gameModeSlide, setGameModeSlide] = useState(0);
+  const navigate = useNavigate();
+  const { login, user } = useAuth();
+  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [formErrors, setFormErrors] = useState({});
+  const [alertMessage, setAlertMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const features = [
     {
@@ -162,6 +169,12 @@ function Home() {
     return () => clearInterval(interval);
   }, [slidesContent.length]);
 
+  useEffect(() => {
+    if (user) {
+      navigate('/game', { replace: true });
+    }
+  }, [user, navigate]);
+
   const scrollToContent = () => {
     const meetSection = document.querySelector('.home-meet-section');
     if (meetSection) {
@@ -214,6 +227,54 @@ function Home() {
   }
 };
 
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.username.trim()) errors.username = 'Username is required';
+    if (!formData.password) errors.password = 'Password is required';
+    return errors;
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormErrors((prev) => ({ ...prev, [name]: '' }));
+    setAlertMessage('');
+  };
+
+  const handleLoginSubmit = async (event) => {
+    event.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length) {
+      setFormErrors(validationErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setAlertMessage('');
+
+    try {
+      await login({
+        username: formData.username.trim(),
+        password: formData.password,
+      });
+      navigate('/game', { replace: true });
+    } catch (error) {
+      const backendMessage =
+        error.response?.data?.message ||
+        'Incorrect username or password. Please try again.';
+      setAlertMessage(backendMessage);
+
+      if (error.response?.data?.errors) {
+        const backendErrors = Object.entries(error.response.data.errors).reduce(
+          (acc, [key, value]) => ({ ...acc, [key]: value?.[0] }),
+          {}
+        );
+        setFormErrors((prev) => ({ ...prev, ...backendErrors }));
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="test-container">
@@ -274,27 +335,44 @@ function Home() {
               </div>
 
               <div className="home-login-form-container">
-                <form className="home-login-form">
+                {alertMessage && <div className="home-alert">{alertMessage}</div>}
+                <form className="home-login-form" onSubmit={handleLoginSubmit}>
                   <div className="home-form-group">
                     <label>Username</label>
                     <input
                       type="text"
+                      name="username"
                       placeholder="Enter your username"
-                      className="home-form-input"
+                      className={`home-form-input ${formErrors.username ? 'error' : ''}`}
+                      value={formData.username}
+                      onChange={handleInputChange}
                     />
+                    {formErrors.username && (
+                      <p className="home-form-error">{formErrors.username}</p>
+                    )}
                   </div>
 
                   <div className="home-form-group">
                     <label>Password</label>
                     <input
                       type="password"
+                      name="password"
                       placeholder="Enter your password"
-                      className="home-form-input"
+                      className={`home-form-input ${formErrors.password ? 'error' : ''}`}
+                      value={formData.password}
+                      onChange={handleInputChange}
                     />
+                    {formErrors.password && (
+                      <p className="home-form-error">{formErrors.password}</p>
+                    )}
                   </div>
 
-                  <button type="submit" className="test-button-solid home-login-button">
-                    Continue to Login
+                  <button
+                    type="submit"
+                    className="test-button-solid home-login-button"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Signing in...' : 'Continue to Login'}
                   </button>
 
                   <div className="home-register-link">
