@@ -102,7 +102,7 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
 - [x] Test all API endpoints
 
 ### Phase 3: Frontend - Authentication
-- [ ] Create landing/home page with Tailwind styling
+- [x] Create landing/home page with Tailwind styling
 - [ ] Design and build registration form using Tailwind utility classes
 - [ ] Design and build login form using Tailwind utility classes
 - [ ] Implement form validation with Tailwind error states
