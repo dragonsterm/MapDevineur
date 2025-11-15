@@ -14,6 +14,7 @@ function Home() {
   const [formErrors, setFormErrors] = useState({});
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const features = [
     {
@@ -335,7 +336,6 @@ function Home() {
               </div>
 
               <div className="home-login-form-container">
-                {alertMessage && <div className="home-alert">{alertMessage}</div>}
                 <form className="home-login-form" onSubmit={handleLoginSubmit}>
                   <div className="home-form-group">
                     <label>Username</label>
@@ -347,24 +347,37 @@ function Home() {
                       value={formData.username}
                       onChange={handleInputChange}
                     />
-                    {formErrors.username && (
-                      <p className="home-form-error">{formErrors.username}</p>
-                    )}
                   </div>
 
                   <div className="home-form-group">
                     <label>Password</label>
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="Enter your password"
-                      className={`home-form-input ${formErrors.password ? 'error' : ''}`}
-                      value={formData.password}
-                      onChange={handleInputChange}
-                    />
-                    {formErrors.password && (
-                      <p className="home-form-error">{formErrors.password}</p>
-                    )}
+                    <div className="home-password-wrapper">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        placeholder="Enter your password"
+                        className={`home-form-input ${formErrors.password ? 'error' : ''}`}
+                        value={formData.password}
+                        onChange={handleInputChange}
+                      />
+                      <button
+                        type="button"
+                        className="home-password-toggle"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <button
@@ -372,13 +385,22 @@ function Home() {
                     className="test-button-solid home-login-button"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Signing in...' : 'Continue to Login'}
+                    {isSubmitting ? (
+                      <>
+                        <span className="home-login-spinner"></span>
+                        Signing in...
+                      </>
+                    ) : (
+                      'Continue to Login'
+                    )}
                   </button>
 
                   <div className="home-register-link">
                     Don't have account?{' '}
                     <Link to="/register">register new account</Link>
                   </div>
+
+                  {alertMessage && <div className="home-alert">{alertMessage}</div>}
 
                   <div className="home-terms">
                     By Continuing, you agree to MapDevineur's{' '}
