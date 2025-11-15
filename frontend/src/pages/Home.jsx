@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../components/test.css';
 import './home.css';
 
@@ -172,7 +173,14 @@ function Home() {
   const scrollToGameModes = () => {
     const gameModeSection = document.querySelector('.test-features-section');
     if (gameModeSection) {
-      gameModeSection.scrollIntoView({ behavior: 'smooth' });
+      const headerOffset = 80;
+      const elementPosition = gameModeSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
