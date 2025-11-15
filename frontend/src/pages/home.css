@@ -429,14 +429,17 @@
   width: 32px;
   background: linear-gradient(90deg, #3B82F6, #60A5FA);
   box-shadow: 0 0 12px rgba(96, 165, 250, 0.4);
+  outline: none;
 }
 
 .home-carousel-dot:not(.active) {
   width: 6px;
+  outline: none;
 }
 
 .home-carousel-dot:hover:not(.active) {
   background: rgba(255, 255, 255, 0.3);
+  outline: none;
 }
 
 .home-login-bottom {
@@ -456,6 +459,10 @@
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.home-learn-more-button:hover {
+  outline: none;
 }
 
 /* Meet MapDevineur Section */
@@ -747,6 +754,7 @@ home-gamemode-title {
 
 .home-gamemode-carousel-btn:hover:not(:disabled) {
   color: #60A5FA;
+  outline: none;
 }
 
 .home-gamemode-carousel-btn:hover:not(:disabled) svg {
@@ -760,10 +768,12 @@ home-gamemode-title {
 
 .home-gamemode-carousel-btn-left {
   left: 10px;
+  outline: none;
 }
 
 .home-gamemode-carousel-btn-right {
   right: 10px;
+  outline: none;
 }
 
 .home-gamemode-dots {
@@ -786,14 +796,17 @@ home-gamemode-title {
   width: 32px;
   background: linear-gradient(90deg, #3B82F6, #60A5FA);
   box-shadow: 0 0 12px rgba(96, 165, 250, 0.4);
+  outline: none;
 }
 
 .home-gamemode-dot:not(.active) {
   width: 6px;
+  outline: none;
 }
 
 .home-gamemode-dot:hover:not(.active) {
   background: rgba(255, 255, 255, 0.3);
+  outline: none;
 }
 
 /* FAQ Section */
@@ -893,8 +906,6 @@ home-gamemode-title {
   padding: 0 0 28px 0;
 }
 
-
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -906,8 +917,11 @@ home-gamemode-title {
   }
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
+  .home-header-nav {
+    display: none;
+  }
+
   .home-login-content {
     grid-template-columns: 1fr !important;
     gap: 40px !important;
