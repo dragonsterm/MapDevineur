@@ -259,6 +259,10 @@
   font-weight: 600;
 }
 
+.home-login-button:focus {
+  outline: none;
+}
+
 .home-register-link {
   text-align: center;
   font-size: 13px;
