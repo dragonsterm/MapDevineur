@@ -22,4 +22,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/leaderboard', [LeaderboardController::class, 'index']);
     Route::get('/leaderboard/user/{id}', [LeaderboardController::class, 'userScores']);
 });
-?>

@@ -32,7 +32,7 @@ class GameController extends Controller
             'round_number' => 'required|integer|min:1|max:5',
             'guess_latitude' => 'required|numeric|between:-90,90',
             'guess_longitude' => 'required|numeric|between:-180,180',
-            'time_taken' => 'required|integer|min:0|max:60',
+            'time_taken' => 'required|integer|min:0|max:120',
         ]);
 
         $game = Game::where('id', $id)
@@ -40,6 +40,7 @@ class GameController extends Controller
             ->firstOrFail();
 
         $location = \App\Models\Location::findOrFail($validated['location_id']);
+        
         $distance = $this->calculateDistance(
             $location->latitude,
             $location->longitude,
@@ -48,7 +49,7 @@ class GameController extends Controller
         );
 
         $baseScore = max(0, 5000 - ($distance * 10));
-        $timeBonus = max(0, (60 - $validated['time_taken']) * 10);
+        $timeBonus = max(0, (120 - $validated['time_taken']) * 10);
         $roundScore = (int) ($baseScore + $timeBonus);
 
         $round = GameRound::create([
@@ -66,9 +67,9 @@ class GameController extends Controller
             'message' => 'Round submitted successfully',
             'round' => [
                 'id' => $round->id,
-                'round_number' => $round->round_number,
-                'distance' => $round->distance,
-                'round_score' => $round->round_score,
+                'distance' => $distance,
+                'time_taken' => $validated['time_taken'],
+                'round_score' => $roundScore,
                 'actual_location' => [
                     'latitude' => $location->latitude,
                     'longitude' => $location->longitude,
@@ -101,7 +102,7 @@ class GameController extends Controller
             'message' => 'Game completed successfully',
             'game' => [
                 'id' => $game->id,
-                'total_score' => $game->total_score,
+                'total_score' => $totalScore,
                 'completed_at' => $game->completed_at,
             ],
         ]);

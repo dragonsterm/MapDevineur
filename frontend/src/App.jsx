@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import Game from './pages/Game';
+import Session from './pages/Session';
 import Registration from './pages/Registration';
 import Loading from './pages/Loading';
 import ResetPassword from './pages/ResetPassword';
@@ -38,6 +39,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Game />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/session"
+            element={
+              <ProtectedRoute>
+                <Session />
               </ProtectedRoute>
             }
           />

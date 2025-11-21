@@ -11,10 +11,14 @@ export function AuthProvider({ children }) {
     const fetchUser = async () => {
       try {
         const { data } = await apiClient.get('/api/user');
-        setUser({
-          id: data.id,
-          username: data.username,
-        });
+        if (data?.user) {
+          setUser({
+            id: data.user.id,
+            username: data.user.username,
+          });
+        } else {
+          setUser(null);
+        }
       } catch {
         setUser(null);
       } finally {
