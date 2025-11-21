@@ -5,7 +5,6 @@ function StreetView({ location }) {
   const panoramaRef = useRef(null);
   const [isApiReady, setIsApiReady] = useState(false);
 
-  // Check if Google Maps API is loaded
   useEffect(() => {
     const checkGoogleMaps = () => {
       if (window.google && window.google.maps && window.google.maps.StreetViewPanorama) {
@@ -44,7 +43,6 @@ function StreetView({ location }) {
 
     console.log(`[Street View] Initializing at: ${lat}, ${lng}`);
 
-    // Clean up previous panorama
     if (panoramaRef.current) {
       console.log('[Street View] Cleaning up previous instance');
       try {
@@ -84,7 +82,6 @@ function StreetView({ location }) {
               }
             );
 
-            // Listen for status changes
             panoramaRef.current.addListener('status_changed', () => {
               const panoStatus = panoramaRef.current.getStatus();
               console.log('[Street View] Status:', panoStatus);
