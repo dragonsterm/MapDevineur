@@ -170,12 +170,6 @@ function Home() {
     return () => clearInterval(interval);
   }, [slidesContent.length]);
 
-  useEffect(() => {
-    if (user) {
-      navigate('/game', { replace: true });
-    }
-  }, [user, navigate]);
-
   const scrollToContent = () => {
     const meetSection = document.querySelector('.home-meet-section');
     if (meetSection) {
@@ -258,7 +252,8 @@ function Home() {
         username: formData.username.trim(),
         password: formData.password,
       });
-      navigate('/game', { replace: true });
+      // Redirect to loading page instead of game
+      navigate('/loading', { state: { type: 'login' }, replace: true });
     } catch (error) {
       const backendMessage =
         error.response?.data?.message ||

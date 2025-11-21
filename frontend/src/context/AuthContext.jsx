@@ -1,43 +1,61 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import apiClient from '../services/api';
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
 
-  const fetchUser = async () => {
-    try {
-      const { data } = await apiClient.get('/api/user');
-      setUser(data.user);
-    } catch {
-      setUser(null);
-    } finally {
-      setInitializing(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await apiClient.get('/api/user');
+        // Only store essential user data
+        setUser({
+          id: data.id,
+          username: data.username,
+        });
+      } catch {
+        setUser(null);
+      } finally {
+        setInitializing(false);
+      }
+    };
+
     fetchUser();
   }, []);
 
+  const register = async (credentials) => {
+    await apiClient.get('/sanctum/csrf-cookie');
+    const { data } = await apiClient.post('/register', credentials);
+    // Only store essential user data
+    setUser({
+      id: data.user.id,
+      username: data.user.username,
+    });
+  };
+
   const login = async (credentials) => {
     await apiClient.get('/sanctum/csrf-cookie');
-    await apiClient.post('/login', credentials);
-    await fetchUser();
+    const { data } = await apiClient.post('/login', credentials);
+    // Only store essential user data
+    setUser({
+      id: data.user.id,
+      username: data.user.username,
+    });
   };
 
   const logout = async () => {
-    try {
-      await apiClient.post('/logout');
-    } finally {
-      setUser(null);
-    }
+    await apiClient.post('/logout');
+    setUser(null);
+    // Clear storage on logout
+    localStorage.clear();
+    sessionStorage.clear();
   };
 
   return (
-    <AuthContext.Provider value={{ user, initializing, login, logout }}>
+    <AuthContext.Provider value={{ user, register, login, logout, initializing }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,0 +1,66 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import './loading.css';
+
+function Loading() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [progress, setProgress] = useState(0);
+  
+  // Get message type from location state (login or register)
+  const isRegister = location.state?.type === 'register';
+  const message = isRegister 
+    ? 'Registered account successfully, you will be redirected shortly'
+    : 'Login successful, you will be redirected shortly';
+
+  useEffect(() => {
+    // Progress bar animation
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + 2; // Increase by 2% every 40ms (2000ms / 50 steps)
+      });
+    }, 40);
+
+    // Redirect after 2 seconds
+    const redirectTimeout = setTimeout(() => {
+      navigate('/game', { replace: true });
+    }, 2000);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearTimeout(redirectTimeout);
+    };
+  }, [navigate]);
+
+  return (
+    <div className="loading-container">
+      <div className="loading-background-glow"></div>
+      
+      <div className="loading-content">
+        <div className="loading-logo-wrapper">
+          <div className="loading-pulse-bg"></div>
+          <div className="loading-logo">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+          </div>
+        </div>
+
+        <h1 className="loading-title">{message}</h1>
+
+        <div className="loading-bar-container">
+          <div 
+            className="loading-bar-fill"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Loading;

@@ -1,0 +1,150 @@
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  padding: 0 24px;
+}
+
+.loading-logo-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-pulse-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(139, 92, 246, 0.3) 30%, rgba(139, 92, 246, 0.15) 50%, transparent 70%);
+  border-radius: 50%;
+  animation: loading-pulse-glow 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(100px);
+}
+
+@keyframes loading-pulse-glow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 1;
+  }
+}
+
+.loading-logo {
+  position: relative;
+  z-index: 1;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 17, 23, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.loading-logo svg {
+  color: #60A5FA;
+  filter: drop-shadow(0 0 20px rgba(96, 165, 250, 0.6));
+}
+
+.loading-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+  line-height: 1.6;
+  animation: loading-fade-in 0.6s ease-out;
+}
+
+@keyframes loading-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-bar-container {
+  width: 100%;
+  max-width: 400px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 50%, #ffffff 100%);
+  border-radius: 2px;
+  transition: width 40ms linear;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+}
+
+@media (max-width: 768px) {
+  .loading-content {
+    gap: 32px;
+  }
+
+  .loading-logo-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+
+  .loading-logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .loading-logo svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .loading-pulse-bg {
+    width: 300px;
+    height: 300px;
+  }
+
+  .loading-title {
+    font-size: 16px;
+  }
+
+  .loading-bar-container {
+    max-width: 320px;
+  }
+}
