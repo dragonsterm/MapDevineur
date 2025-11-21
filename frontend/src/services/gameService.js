@@ -1,21 +1,21 @@
-import api from './api';
-
-export const getRandomLocations = async () => {
-  const response = await api.get('/api/locations/random');
-  return response.data;
-};
+import apiClient from './api';
 
 export const createGame = async () => {
-  const response = await api.post('/api/games');
-  return response.data;
+  const { data } = await apiClient.post('/api/games');
+  return data;
+};
+
+export const getRandomLocations = async (count = 5) => {
+  const { data } = await apiClient.get(`/api/locations/random?count=${count}`);
+  return data;
 };
 
 export const submitRound = async (gameId, roundData) => {
-  const response = await api.post(`/api/games/${gameId}/rounds`, roundData);
-  return response.data;
+  const { data } = await apiClient.post(`/api/games/${gameId}/rounds`, roundData);
+  return data;
 };
 
 export const completeGame = async (gameId) => {
-  const response = await api.post(`/api/games/${gameId}/complete`);
-  return response.data;
+  const { data } = await apiClient.post(`/api/games/${gameId}/complete`);
+  return data;
 };

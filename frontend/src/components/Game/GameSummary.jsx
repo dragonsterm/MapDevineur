@@ -23,7 +23,7 @@ function GameSummary({ totalScore, rounds }) {
         </div>
 
         <Link
-          to="/"
+          to="/game"
           className="block w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 rounded-lg transition-all text-center"
         >
           Back to Home

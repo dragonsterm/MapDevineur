@@ -1,48 +1,59 @@
 import { useEffect, useRef, useState } from 'react';
 
-function GuessMap({ onGuess, disabled, isOpen, onClose }) {
+function GuessMap({ onGuess, disabled, isOpen, onClose, currentGuess }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [marker, setMarker] = useState(null);
+  const markerRef = useRef(null);
   const [hasGuessed, setHasGuessed] = useState(false);
+  const [isApiReady, setIsApiReady] = useState(false);
 
   useEffect(() => {
-    if (window.google && mapRef.current && isOpen && !mapInstanceRef.current) {
+    const checkGoogleMaps = () => {
+      if (window.google && window.google.maps) {
+        setIsApiReady(true);
+        return true;
+      }
+      return false;
+    };
+
+    if (checkGoogleMaps()) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      if (checkGoogleMaps()) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && isApiReady && mapRef.current && !mapInstanceRef.current) {
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: 20, lng: 0 },
         zoom: 2,
         mapTypeControl: true,
         streetViewControl: false,
         fullscreenControl: true,
-        mapTypeId: 'roadmap', // Changed from 'hybrid' to 'roadmap' (default, no colors)
+        mapTypeId: 'roadmap',
+        restriction: {
+          latLngBounds: {
+            north: 85,
+            south: -85,
+            west: -180,
+            east: 180
+          },
+          strictBounds: true
+        }
       });
 
       mapInstanceRef.current = map;
 
       const clickListener = map.addListener('click', (event) => {
         if (!disabled) {
-          if (marker) {
-            marker.setMap(null);
-          }
-          const newMarker = new window.google.maps.Marker({
-            position: event.latLng,
-            map: map,
-            draggable: true,
-            animation: window.google.maps.Animation.DROP,
-          });
-          setMarker(newMarker);
-          setHasGuessed(true);
-          onGuess({
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng(),
-          });
-
-          newMarker.addListener('dragend', (e) => {
-            onGuess({
-              lat: e.latLng.lat(),
-              lng: e.latLng.lng(),
-            });
-          });
+          placeMarker(event.latLng);
         }
       });
 
@@ -50,17 +61,61 @@ function GuessMap({ onGuess, disabled, isOpen, onClose }) {
         window.google.maps.event.removeListener(clickListener);
       };
     }
-  }, [isOpen, disabled, onGuess]);
+  }, [isOpen, isApiReady, disabled]);
+
+  const placeMarker = (latLng) => {
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+    }
+
+    const newMarker = new window.google.maps.Marker({
+      position: latLng,
+      map: mapInstanceRef.current,
+      draggable: true,
+      animation: window.google.maps.Animation.DROP,
+    });
+
+    markerRef.current = newMarker;
+    setHasGuessed(true);
+    
+    onGuess({
+      lat: latLng.lat(),
+      lng: latLng.lng(),
+    });
+
+    newMarker.addListener('dragend', (e) => {
+      onGuess({
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen && currentGuess && mapInstanceRef.current) {
+      const latLng = new window.google.maps.LatLng(currentGuess.lat, currentGuess.lng);
+      placeMarker(latLng);
+    }
+  }, [isOpen, currentGuess]);
+
+  useEffect(() => {
+    if (isOpen && mapInstanceRef.current) {
+      setTimeout(() => {
+        window.google.maps.event.trigger(mapInstanceRef.current, 'resize');
+      }, 100);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
-      if (marker) {
-        marker.setMap(null);
-        setMarker(null);
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+        markerRef.current = null;
       }
+      mapInstanceRef.current = null;
       setHasGuessed(false);
     }
-  }, [isOpen, marker]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

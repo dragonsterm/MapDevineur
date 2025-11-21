@@ -115,17 +115,17 @@ MapDevineur is a GeoGuesser-inspired web application that challenges players to 
 
 ### Phase 4: Frontend - Game Logic
 - [ ] Create game start screen with Tailwind layout
-- [ ] Design game interface layout using Tailwind Flexbox/Grid
-- [ ] Integrate Google Street View component
-- [ ] Integrate Google Maps component for guessing
-- [ ] Implement round timer (1 minute countdown) with Tailwind styling
-- [ ] Create guess submission functionality
-- [ ] Calculate distance between guess and actual location
-- [ ] Implement scoring algorithm (distance + time bonus)
-- [ ] Display round results with Tailwind cards/modals
-- [ ] Track score across 5 rounds
-- [ ] Create end-game summary screen with Tailwind styling
-- [ ] Submit final score to backend
+- [x] Design game interface layout using Tailwind Flexbox/Grid
+- [x] Integrate Google Street View component
+- [x] Integrate Google Maps component for guessing
+- [x] Implement round timer (1 minute countdown) with Tailwind styling
+- [x] Create guess submission functionality
+- [x] Calculate distance between guess and actual location
+- [x] Implement scoring algorithm (distance + time bonus)
+- [x] Display round results with Tailwind cards/modals
+- [x] Track score across 5 rounds
+- [x] Create end-game summary screen with Tailwind styling
+- [x] Submit final score to backend
 
 ### Phase 5: Frontend - Leaderboard
 - [ ] Design leaderboard page with Tailwind table/card components

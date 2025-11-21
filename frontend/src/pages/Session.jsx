@@ -12,7 +12,6 @@ function Session() {
   const navigate = useNavigate();
   const gameId = location.state?.gameId;
 
-  const [locations, setLocations] = useState([]);
   const [currentRound, setCurrentRound] = useState(0);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [guess, setGuess] = useState(null);
@@ -23,8 +22,44 @@ function Session() {
   const [totalScore, setTotalScore] = useState(0);
   const [roundStartTime, setRoundStartTime] = useState(Date.now());
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showGuessMap, setShowGuessMap] = useState(false);
+  const [streetViewKey, setStreetViewKey] = useState(0);
+
+  const fetchNextLocation = async (roundNumber) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      setCurrentLocation(null);
+      setGuess(null);
+      
+      console.log(`[Round ${roundNumber}] Fetching new location...`);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const data = await getRandomLocations(1);
+      
+      if (!data.locations || data.locations.length === 0) {
+        setError('No locations available. Please contact administrator.');
+        return;
+      }
+      
+      const newLocation = data.locations[0];
+      console.log(`[Round ${roundNumber}] Location fetched`);
+      
+      setTimeout(() => {
+        setCurrentLocation(newLocation);
+        setRoundStartTime(Date.now());
+        setStreetViewKey(prev => prev + 1);
+        setIsLoading(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Failed to fetch location:', error);
+      setError(error.response?.data?.message || 'Failed to load location. Please try again.');
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!gameId) {
@@ -32,31 +67,7 @@ function Session() {
       return;
     }
 
-    const fetchLocations = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getRandomLocations();
-        
-        console.log('Fetched locations:', data.locations);
-        
-        if (!data.locations || data.locations.length === 0) {
-          setError('No locations available. Please contact administrator.');
-          return;
-        }
-        
-        setLocations(data.locations);
-        setCurrentLocation(data.locations[0]);
-        setRoundStartTime(Date.now());
-      } catch (error) {
-        console.error('Failed to fetch locations:', error);
-        setError(error.response?.data?.message || 'Failed to load game locations. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLocations();
+    fetchNextLocation();
   }, [gameId, navigate]);
 
   const handleGuess = (coordinates) => {
@@ -71,17 +82,17 @@ function Session() {
     setShowGuessMap(false);
   };
 
-  const handleSubmit = async () => {
-    if (!guess || !currentLocation) return;
+  const submitGuess = async (guessToSubmit) => {
+    if (!guessToSubmit || !currentLocation) return;
 
-    const timeTaken = Math.floor((Date.now() - roundStartTime) / 1000);
+    const timeTaken = Math.min(120, Math.floor((Date.now() - roundStartTime) / 1000));
     
     try {
       const result = await submitRound(gameId, {
         location_id: currentLocation.id,
         round_number: currentRound + 1,
-        guess_latitude: guess.lat,
-        guess_longitude: guess.lng,
+        guess_latitude: guessToSubmit.lat,
+        guess_longitude: guessToSubmit.lng,
         time_taken: timeTaken,
       });
 
@@ -96,14 +107,19 @@ function Session() {
 
   const handleNextRound = () => {
     setShowResult(false);
+    setShowGuessMap(false);
     setGuess(null);
-    setRoundStartTime(Date.now());
     setError(null);
+    setCurrentResult(null);
 
     if (currentRound < 4) {
       const nextRoundIndex = currentRound + 1;
       setCurrentRound(nextRoundIndex);
-      setCurrentLocation(locations[nextRoundIndex]);
+      
+      setTimeout(() => {
+        fetchNextLocation(nextRoundIndex + 1);
+      }, 2000);
+      
     } else {
       completeGameSession();
     }
@@ -121,24 +137,14 @@ function Session() {
   };
 
   const handleTimeUp = () => {
-    if (!showResult && guess) {
-      handleSubmit();
-    }
+    if (showResult) return;
+    // If no guess, submit a dummy guess at (0,0)
+    const guessForSubmit = guess || { lat: 0, lng: 0 };
+    submitGuess(guessForSubmit);
   };
 
   if (isGameComplete) {
     return <GameSummary totalScore={totalScore} rounds={roundResults} />;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-          <p className="text-white text-xl">Loading game...</p>
-        </div>
-      </div>
-    );
   }
 
   if (error) {
@@ -158,20 +164,15 @@ function Session() {
     );
   }
 
-  if (!currentLocation) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white text-xl">Loading location...</p>
-      </div>
-    );
-  }
-
   return (
     <div style={{ 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
       display: 'flex', 
-      flexDirection: 'column', 
-      height: '100vh', 
-      width: '100vw',
+      flexDirection: 'column',
       overflow: 'hidden',
       background: '#000'
     }}>
@@ -184,96 +185,127 @@ function Session() {
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 20,
-        position: 'relative'
+        flexShrink: 0
       }}>
         <div style={{ color: '#fff' }}>
-          <span style={{ fontSize: '18px', fontWeight: '600' }}>Round {currentRound + 1} of 5</span>
+          <span style={{ fontSize: '18px', fontWeight: '600' }}>
+            Round {currentRound + 1} of 5
+          </span>
         </div>
-        <Timer duration={120} onTimeUp={handleTimeUp} isRunning={!showResult} />
+        <Timer key={currentRound} duration={120} onTimeUp={handleTimeUp} isRunning={!showResult && !isLoading} />
       </div>
 
       {/* Street View - Full Screen */}
       <div style={{ 
-        flex: 1, 
+        flex: 1,
         position: 'relative',
-        width: '100%',
-        height: 'calc(100vh - 70px)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        background: '#0a0a0a'
       }}>
-        <StreetView location={currentLocation} />
-        
-        {/* Menu Button - Left Corner */}
-        <button
-          onClick={handleOpenGuessMap}
-          disabled={showResult}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            left: '16px',
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: '#fff',
-            padding: '12px 24px',
-            borderRadius: '8px',
-            border: '1px solid #444',
-            cursor: showResult ? 'not-allowed' : 'pointer',
-            opacity: showResult ? 0.5 : 1,
+        {isLoading ? (
+          <div style={{
+            width: '100%',
+            height: '100%',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            zIndex: 10,
-            fontSize: '14px',
-            fontWeight: '600'
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          {guess ? 'Change Guess' : 'Make Guess'}
-        </button>
-
-        {/* Submit Button (shows when guess is made) */}
-        {guess && !showResult && (
-          <button
-            onClick={handleSubmit}
-            style={{
-              position: 'absolute',
-              bottom: '24px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#fff',
-              padding: '16px 48px',
-              borderRadius: '8px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              zIndex: 10,
-              boxShadow: '0 10px 25px rgba(16, 185, 129, 0.5)'
-            }}
-          >
-            Submit Guess
-          </button>
-        )}
-
-        {/* Guess indicator */}
-        {guess && !showResult && (
-          <div style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'rgba(16, 185, 129, 0.9)',
-            color: '#fff',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            zIndex: 10,
-            fontSize: '14px',
-            fontWeight: '600'
+            justifyContent: 'center'
           }}>
-            Guess placed ✓
+            <div style={{ textAlign: 'center', color: '#fff' }}>
+              <div style={{
+                display: 'inline-block',
+                width: '48px',
+                height: '48px',
+                border: '4px solid #333',
+                borderTop: '4px solid #3b82f6',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginBottom: '16px'
+              }} />
+              <p style={{ fontSize: '18px' }}>Loading round {currentRound + 1}...</p>
+            </div>
           </div>
-        )}
+        ) : currentLocation ? (
+          <>
+            <StreetView key={streetViewKey} location={currentLocation} />
+            
+            {/* Menu Button - Left Corner */}
+            <button
+              onClick={handleOpenGuessMap}
+              disabled={showResult}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                left: '16px',
+                background: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(8px)',
+                color: '#fff',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                cursor: showResult ? 'not-allowed' : 'pointer',
+                opacity: showResult ? 0.5 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                zIndex: 1000,
+                fontSize: '14px',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              {guess ? 'Change Guess' : 'Make Guess'}
+            </button>
+
+            {/* Submit Button (shows when guess is made) */}
+            {guess && !showResult && (
+              <button
+                onClick={() => submitGuess(guess)}
+                style={{
+                  position: 'absolute',
+                  bottom: '24px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff',
+                  padding: '16px 48px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  zIndex: 1000,
+                  boxShadow: '0 10px 25px rgba(16, 185, 129, 0.5)'
+                }}
+              >
+                Submit Guess
+              </button>
+            )}
+
+            {/* Guess indicator */}
+            {guess && !showResult && (
+              <div style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(16, 185, 129, 0.9)',
+                backdropFilter: 'blur(8px)',
+                color: '#fff',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                zIndex: 1000,
+                fontSize: '14px',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+              }}>
+                Guess placed ✓
+              </div>
+            )}
+          </>
+        ) : null}
       </div>
 
       {/* Guess Map Modal */}

@@ -4,19 +4,23 @@ function Timer({ duration, onTimeUp, isRunning }) {
   const [timeLeft, setTimeLeft] = useState(duration);
 
   useEffect(() => {
-    if (isRunning && timeLeft > 0) {
-      const interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            onTimeUp();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
+    if (!isRunning) {
+      return;
     }
-  }, [isRunning, timeLeft, onTimeUp]);
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          onTimeUp();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, onTimeUp]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
