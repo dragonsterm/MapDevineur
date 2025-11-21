@@ -2,4 +2,6 @@ LICENSE
 README.md
 .gitignore
 apikey.md
+index.html
 .idea
+.env
