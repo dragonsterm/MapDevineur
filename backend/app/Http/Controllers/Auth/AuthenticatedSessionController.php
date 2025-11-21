@@ -16,7 +16,9 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return response()->json(['message' => 'Invalid credentials.'], 422);
+            return response()->json([
+                'message' => 'Wrong username or password. Forgot your password? reset it '
+            ], 422);
         }
 
         $request->session()->regenerate();

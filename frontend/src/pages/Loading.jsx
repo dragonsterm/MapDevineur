@@ -6,26 +6,23 @@ function Loading() {
   const navigate = useNavigate();
   const location = useLocation();
   const [progress, setProgress] = useState(0);
-  
-  // Get message type from location state (login or register)
   const isRegister = location.state?.type === 'register';
   const message = isRegister 
     ? 'Registered account successfully, you will be redirected shortly'
     : 'Login successful, you will be redirected shortly';
 
   useEffect(() => {
-    // Progress bar animation
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 2; // Increase by 2% every 40ms (2000ms / 50 steps)
+        return prev + 2;
       });
     }, 40);
 
-    // Redirect after 2 seconds
+    // Redirect after 2 sec
     const redirectTimeout = setTimeout(() => {
       navigate('/game', { replace: true });
     }, 2000);

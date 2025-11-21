@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
     const fetchUser = async () => {
       try {
         const { data } = await apiClient.get('/api/user');
-        // Only store essential user data
         setUser({
           id: data.id,
           username: data.username,
@@ -29,7 +28,6 @@ export function AuthProvider({ children }) {
   const register = async (credentials) => {
     await apiClient.get('/sanctum/csrf-cookie');
     const { data } = await apiClient.post('/register', credentials);
-    // Only store essential user data
     setUser({
       id: data.user.id,
       username: data.user.username,
@@ -39,7 +37,6 @@ export function AuthProvider({ children }) {
   const login = async (credentials) => {
     await apiClient.get('/sanctum/csrf-cookie');
     const { data } = await apiClient.post('/login', credentials);
-    // Only store essential user data
     setUser({
       id: data.user.id,
       username: data.user.username,
@@ -47,11 +44,22 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await apiClient.post('/logout');
-    setUser(null);
-    // Clear storage on logout
-    localStorage.clear();
-    sessionStorage.clear();
+    try {
+      await apiClient.post('/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date(0).toUTCString() + ";path=/");
+      });
+    }
   };
 
   return (

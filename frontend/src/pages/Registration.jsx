@@ -25,7 +25,6 @@ function Registration() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Comment out or remove this useEffect
   // useEffect(() => {
   //   if (user) {
   //     navigate('/game');
@@ -66,19 +65,25 @@ function Registration() {
         password: formData.password,
         password_confirmation: formData.passwordConfirmation,
       });
-      // Redirect to loading page instead of game
       navigate('/loading', { state: { type: 'register' }, replace: true });
     } catch (error) {
-      const backendMessage =
-        error.response?.data?.message || 'Registration failed. Please try again.';
-      setAlertMessage(backendMessage);
+      const usernameTaken = error.response?.data?.errors?.username?.[0];
 
-      if (error.response?.data?.errors) {
-        const backendErrors = Object.entries(error.response.data.errors).reduce(
-          (acc, [key, value]) => ({ ...acc, [key]: value?.[0] }),
-          {}
-        );
-        setFormErrors((prev) => ({ ...prev, ...backendErrors }));
+      if (usernameTaken) {
+        setAlertMessage('Username is already taken.');
+        setFormErrors((prev) => ({ ...prev, username: usernameTaken }));
+      } else {
+        const backendMessage =
+          error.response?.data?.message || 'Registration failed. Please try again.';
+        setAlertMessage(backendMessage);
+
+        if (error.response?.data?.errors) {
+          const backendErrors = Object.entries(error.response.data.errors).reduce(
+            (acc, [key, value]) => ({ ...acc, [key]: value?.[0] }),
+            {}
+          );
+          setFormErrors((prev) => ({ ...prev, ...backendErrors }));
+        }
       }
     } finally {
       setIsSubmitting(false);

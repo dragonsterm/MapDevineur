@@ -926,6 +926,12 @@ home-gamemode-title {
   font-weight: 500;
 }
 
+.home-alert-link {
+  color: #9ca3af;;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
 .home-form-input.error {
   border-color: rgba(239, 68, 68, 0.65);
   background: rgba(239, 68, 68, 0.08);

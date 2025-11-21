@@ -252,12 +252,12 @@ function Home() {
         username: formData.username.trim(),
         password: formData.password,
       });
-      // Redirect to loading page instead of game
       navigate('/loading', { state: { type: 'login' }, replace: true });
     } catch (error) {
+      setAlertMessage('Wrong username or password. Forgot your password? reset it ');
       const backendMessage =
         error.response?.data?.message ||
-        'Incorrect username or password. Please try again.';
+        'Wrong username or password. Forgot your password? reset it  ';
       setAlertMessage(backendMessage);
 
       if (error.response?.data?.errors) {
@@ -375,6 +375,16 @@ function Home() {
                     </div>
                   </div>
 
+                  {alertMessage && (
+                    <div className="home-alert">
+                      {alertMessage}{' '}
+                      <Link to="/reset-password" className="home-alert-link">
+                        here
+                      </Link>
+                      .
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     className="test-button-solid home-login-button"
@@ -394,8 +404,6 @@ function Home() {
                     Don't have account?{' '}
                     <Link to="/register">register new account</Link>
                   </div>
-
-                  {alertMessage && <div className="home-alert">{alertMessage}</div>}
 
                   <div className="home-terms">
                     By Continuing, you agree to MapDevineur's{' '}

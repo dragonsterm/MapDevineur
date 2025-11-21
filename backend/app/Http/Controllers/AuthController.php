@@ -47,7 +47,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('username', 'password'))) {
             throw ValidationException::withMessages([
-                'username' => ['The provided credentials are incorrect.'],
+                'username' => ['Wrong username or password. Forgot your password? reset it '],
             ]);
         }
 

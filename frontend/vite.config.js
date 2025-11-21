@@ -8,7 +8,6 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
-    // Add headers configuration
     headers: {
       'Access-Control-Allow-Origin': 'http://localhost:8000',
       'Access-Control-Allow-Credentials': 'true',
