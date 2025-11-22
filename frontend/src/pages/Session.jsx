@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import StreetView from '../components/Game/StreetView';
 import GuessMap from '../components/Game/GuessMap';
@@ -11,6 +11,10 @@ function Session() {
   const location = useLocation();
   const navigate = useNavigate();
   const gameId = location.state?.gameId;
+  
+  // Use a ref to track if we have already fetched for this specific game ID
+  // This prevents the "Double Fetch" issue in React Strict Mode
+  const lastFetchedGameId = useRef(null);
 
   const [currentRound, setCurrentRound] = useState(0);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -31,7 +35,6 @@ function Session() {
       setError(null);
       setGuess(null);
   
-      
       const data = await getRandomLocations(1);
       
       if (!data.locations || data.locations.length === 0) {
@@ -59,6 +62,13 @@ function Session() {
       navigate('/game');
       return;
     }
+
+    // FIX: Check if we already fetched for this gameId to prevent double-loading
+    if (lastFetchedGameId.current === gameId) {
+      return;
+    }
+    lastFetchedGameId.current = gameId;
+
     fetchNextLocation();
   }, [gameId, navigate]);
 
