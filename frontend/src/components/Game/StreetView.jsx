@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
+import { loadGoogleMaps } from '../../services/googleMapsLoader';
 
 function StreetView({ location }) {
   const streetViewRef = useRef(null);
@@ -6,64 +7,97 @@ function StreetView({ location }) {
   const [isApiReady, setIsApiReady] = useState(false);
 
   useEffect(() => {
-    const checkGoogleMaps = () => {
-      if (window.google && window.google.maps && window.google.maps.StreetViewPanorama) {
+    loadGoogleMaps()
+      .then(() => {
         setIsApiReady(true);
-        return true;
-      }
-      return false;
-    };
-
-    if (checkGoogleMaps()) return;
-    const interval = setInterval(() => {
-      if (checkGoogleMaps()) clearInterval(interval);
-    }, 100);
-    return () => clearInterval(interval);
+      })
+      .catch((err) => {
+        console.error("[StreetView] Failed to load Google Maps API:", err);
+      });
   }, []);
 
   useEffect(() => {
-    if (!isApiReady || !streetViewRef.current) return;
+    if (!isApiReady || !streetViewRef.current || panoramaRef.current) return;
+
+    console.log('[Street View] Initializing new Panorama instance');
     
-    if (!location) return;
+    panoramaRef.current = new window.google.maps.StreetViewPanorama(
+      streetViewRef.current,
+      {
+        pov: { heading: 0, pitch: 0 },
+        zoom: 0,
+        addressControl: false,
+        linksControl: true,    
+        panControl: true,
+        clickToGo: true,         
+        enableCloseButton: false,
+        showRoadLabels: false,
+        motionTracking: false,
+        motionTrackingControl: false,
+        fullscreenControl: false,
+        visible: false,
+      }
+    );
+
+    return () => {
+      panoramaRef.current = null;
+    };
+  }, [isApiReady]);
+
+  useEffect(() => {
+    if (!panoramaRef.current || !location || !isApiReady) return;
 
     const lat = parseFloat(location.latitude);
     const lng = parseFloat(location.longitude);
-    
+
     if (isNaN(lat) || isNaN(lng)) return;
 
-    const latLng = { lat, lng };
+    const svService = new window.google.maps.StreetViewService();
+    
+    const request = {
+      location: { lat, lng },
+      radius: 50,
+      source: window.google.maps.StreetViewSource.OUTDOOR
+    };
 
-    if (!panoramaRef.current) {
-      console.log('[Street View] Initializing new instance');
-      panoramaRef.current = new window.google.maps.StreetViewPanorama(
-        streetViewRef.current,
-        {
-          position: latLng, // Initial position
-          pov: { heading: 0, pitch: 0 },
-          zoom: 0,
-          addressControl: false,
-          linksControl: true,
-          panControl: true,
-          enableCloseButton: false,
-          showRoadLabels: false,
-          motionTracking: false,
-          motionTrackingControl: false,
-          fullscreenControl: false, // cleaner UI
+    svService.getPanorama(request)
+      .then(({ data }) => {
+        const panoId = data.location.pano;
+        
+        if (panoramaRef.current.getPano() === panoId) return;
+
+        console.log('[Street View] Found Valid Outdoor Pano ID:', panoId);
+        
+        panoramaRef.current.setPano(panoId);
+        panoramaRef.current.setPov({ heading: 0, pitch: 0 });
+        panoramaRef.current.setVisible(true);
+
+        window.google.maps.event.trigger(panoramaRef.current, 'resize');
+      })
+      .catch((err) => {
+        console.warn('[Street View] No outdoor street view found here, retrying without filter...', err);
+        return svService.getPanorama({ location: { lat, lng }, radius: 50 });
+      })
+      .then((result) => {
+        if (result && result.data) {
+           const panoId = result.data.location.pano;
+           panoramaRef.current.setPano(panoId);
+           panoramaRef.current.setVisible(true);
         }
-      );
-    } else {
-      console.log('[Street View] Updating position');
-      panoramaRef.current.setPosition(latLng);
-      panoramaRef.current.setPov({ heading: 0, pitch: 0 });
-      panoramaRef.current.setVisible(true);
-      
-      window.google.maps.event.trigger(panoramaRef.current, 'resize');
-    }
+      })
+      .catch((err) => {
+         console.error('[Street View] Absolutely no view found:', err);
+         panoramaRef.current.setVisible(false);
+      });
 
-  }, [location?.latitude, location?.longitude, isApiReady]);
+  }, [location, isApiReady]);
 
   if (!isApiReady) {
-    return <div className="w-full h-full bg-black" />;
+    return (
+      <div className="w-full h-full bg-black flex items-center justify-center">
+        <div className="text-gray-500 animate-pulse">Loading Maps...</div>
+      </div>
+    );
   }
 
   return (
@@ -74,4 +108,6 @@ function StreetView({ location }) {
   );
 }
 
-export default StreetView;
+export default memo(StreetView, (prevProps, nextProps) => {
+  return prevProps.location?.id === nextProps.location?.id;
+});

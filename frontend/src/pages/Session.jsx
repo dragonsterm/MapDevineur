@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import StreetView from '../components/Game/StreetView';
 import GuessMap from '../components/Game/GuessMap';
 import Timer from '../components/Game/Timer';
 import RoundResult from '../components/Game/RoundResult';
 import GameSummary from '../components/Game/GameSummary';
+import { loadGoogleMaps } from '../services/googleMapsLoader';
 import { getRandomLocations, submitRound, completeGame } from '../services/gameService';
 
 function Session() {
@@ -22,45 +23,73 @@ function Session() {
   const [totalScore, setTotalScore] = useState(0);
   const [roundStartTime, setRoundStartTime] = useState(Date.now());
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showGuessMap, setShowGuessMap] = useState(false);
+  const [isMapsReady, setIsMapsReady] = useState(false);
 
-  const fetchNextLocation = async (roundNumber) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      setGuess(null);
-  
-      
-      const data = await getRandomLocations(1);
-      
-      if (!data.locations || data.locations.length === 0) {
-        setError('No locations available.');
-        return;
-      }
-      
-      const newLocation = data.locations[0];
-    
-      setTimeout(() => {
-        setCurrentLocation(newLocation);
-        setRoundStartTime(Date.now());
-        setIsLoading(false);
-      }, 500);
-      
-    } catch (error) {
-      console.error('Failed to fetch location:', error);
-      setError('Failed to load location.');
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    let isMounted = true;
+    loadGoogleMaps()
+      .then(() => {
+        if (isMounted) setIsMapsReady(true);
+      })
+      .catch((err) => {
+        console.error("Google Maps failed to load", err);
+        if (isMounted) setError("Failed to load game resources.");
+      });
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     if (!gameId) {
       navigate('/game');
       return;
     }
-    fetchNextLocation();
-  }, [gameId, navigate]);
+
+    let ignore = false;
+
+    const initRound = async () => {
+      try {
+        if (!ignore) {
+          setIsLoading(true);
+          setError(null);
+          setGuess(null);
+        }
+
+        const data = await getRandomLocations(1);
+
+        if (ignore) return; 
+
+        if (!data.locations || data.locations.length === 0) {
+          setError('No locations available.');
+          return;
+        }
+
+        const newLocation = data.locations[0];
+
+        setTimeout(() => {
+          if (!ignore) {
+            setCurrentLocation(newLocation);
+            setRoundStartTime(Date.now());
+            setIsLoading(false);
+          }
+        }, 500);
+
+      } catch (error) {
+        if (!ignore) {
+          console.error('Failed to fetch location:', error);
+          setError('Failed to load location.');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initRound();
+
+    return () => {
+      ignore = true;
+    };
+  }, [gameId, currentRound, navigate]);
 
   const handleGuess = (coordinates) => {
     setGuess(coordinates);
@@ -96,9 +125,7 @@ function Session() {
     setCurrentResult(null);
 
     if (currentRound < 4) {
-      const nextRoundIndex = currentRound + 1;
-      setCurrentRound(nextRoundIndex);
-      fetchNextLocation(nextRoundIndex + 1);
+      setCurrentRound(prev => prev + 1);
     } else {
       completeGameSession();
     }
@@ -127,54 +154,59 @@ function Session() {
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-black">
-      {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 p-4 flex justify-between items-center z-20 shrink-0">
-        <div className="text-white font-semibold text-lg">
-          Round {currentRound + 1} of 5
+      {/*  Map Layer*/}
+      <div className="absolute inset-0 z-0">
+        {isMapsReady && currentLocation && (
+           <StreetView location={currentLocation} />
+        )}
+      </div>
+
+      {/* Loading Overlay */}
+      {(!isMapsReady || isLoading) && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
+          <div className="w-12 h-12 border-4 border-gray-800 border-t-blue-500 rounded-full animate-spin mb-4" />
+          <p className="text-white text-lg">
+            {!isMapsReady ? 'Initializing Maps...' : `Loading Round ${currentRound + 1}...`}
+          </p>
         </div>
-        <Timer key={currentRound} duration={120} onTimeUp={handleTimeUp} isRunning={!showResult && !isLoading} />
-      </div>
+      )}
 
-      {/* Main Game Area */}
-      <div className="flex-1 relative overflow-hidden bg-gray-900">
-        
-        {/* The Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black">
-             <div className="w-12 h-12 border-4 border-gray-800 border-t-blue-500 rounded-full animate-spin mb-4" />
-             <p className="text-white text-lg">Loading Round {currentRound + 1}...</p>
+      {/* Header Timer */}
+      {!isLoading && (
+        <div className="bg-gray-900/80 backdrop-blur border-b border-gray-800 p-4 flex justify-between items-center z-20 shrink-0 relative">
+          <div className="text-white font-semibold text-lg">
+            Round {currentRound + 1} of 5
           </div>
-        )}
+          <Timer key={currentRound} duration={120} onTimeUp={handleTimeUp} isRunning={!showResult && !isLoading} />
+        </div>
+      )}
 
-        {/* The Map */}
-        <StreetView location={currentLocation} />
+      {/* Game Controls*/}
+      {!isLoading && !showResult && currentLocation && (
+        <>
+          <button
+            onClick={() => setShowGuessMap(true)}
+            className="absolute top-20 left-4 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-black transition-all z-20 flex items-center gap-2 font-semibold shadow-lg"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            {guess ? 'Change Guess' : 'Make Guess'}
+          </button>
 
-        {/* Game Controls */}
-        {!isLoading && !showResult && currentLocation && (
-          <>
+          {guess && (
             <button
-              onClick={() => setShowGuessMap(true)}
-              className="absolute top-4 left-4 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-black transition-all z-20 flex items-center gap-2 font-semibold shadow-lg"
+              onClick={() => submitGuess(guess)}
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-12 py-4 rounded-lg font-bold text-lg shadow-xl z-20 hover:scale-105 transition-transform"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              {guess ? 'Change Guess' : 'Make Guess'}
+              Submit Guess
             </button>
+          )}
+        </>
+      )}
 
-            {guess && (
-              <button
-                onClick={() => submitGuess(guess)}
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-12 py-4 rounded-lg font-bold text-lg shadow-xl z-20 hover:scale-105 transition-transform"
-              >
-                Submit Guess
-              </button>
-            )}
-          </>
-        )}
-      </div>
-
+      {/* Guess Map */}
       <GuessMap 
         onGuess={handleGuess} 
         disabled={showResult} 
@@ -183,10 +215,12 @@ function Session() {
         currentGuess={guess} 
       />
 
+      {/* Round Result Overlay */}
       {showResult && currentResult && (
         <RoundResult result={currentResult} onNextRound={handleNextRound} />
       )}
 
+      {/* Error Overlay */}
       {error && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
           <div className="bg-gray-900 border border-red-500 p-8 rounded-lg max-w-md text-center">
