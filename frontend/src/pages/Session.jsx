@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import StreetView from '../components/Game/StreetView';
 import GuessMap from '../components/Game/GuessMap';
@@ -54,6 +54,8 @@ function Session() {
           setIsLoading(true);
           setError(null);
           setGuess(null);
+          setShowResult(false); // Ensure result is hidden on new round
+          setShowGuessMap(false); // Ensure map is closed on new round
         }
 
         const data = await getRandomLocations(1);
@@ -110,7 +112,12 @@ function Session() {
 
       setCurrentResult(result.round);
       setRoundResults([...roundResults, result.round]);
-      setShowResult(true);
+      
+      // KEY CHANGE: Don't close map. Enable Result Mode.
+      setShowResult(true); 
+      // Ensure GuessMap is visible (if triggered by Timer)
+      setShowGuessMap(true);
+
     } catch (error) {
       console.error('Failed to submit round:', error);
       setError('Failed to submit guess.');
@@ -118,8 +125,9 @@ function Session() {
   };
 
   const handleNextRound = () => {
+    // Reset states for next round
     setShowResult(false);
-    setShowGuessMap(false);
+    setShowGuessMap(false); // Close map to reset markers in useEffect cleanup
     setGuess(null);
     setError(null);
     setCurrentResult(null);
@@ -154,7 +162,7 @@ function Session() {
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-black">
-      {/*  Map Layer*/}
+      {/* Map Layer (Background) */}
       <div className="absolute inset-0 z-0">
         {isMapsReady && currentLocation && (
            <StreetView location={currentLocation} />
@@ -181,41 +189,35 @@ function Session() {
         </div>
       )}
 
-      {/* Game Controls*/}
+      {/* Main "Make Guess" Button (Only visible if map is closed and not in result mode) */}
       {!isLoading && !showResult && currentLocation && (
-        <>
-          <button
-            onClick={() => setShowGuessMap(true)}
-            className="absolute top-20 left-4 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-black transition-all z-20 flex items-center gap-2 font-semibold shadow-lg"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            {guess ? 'Change Guess' : 'Make Guess'}
-          </button>
-
-          {guess && (
-            <button
-              onClick={() => submitGuess(guess)}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-12 py-4 rounded-lg font-bold text-lg shadow-xl z-20 hover:scale-105 transition-transform"
-            >
-              Submit Guess
-            </button>
-          )}
-        </>
+        <button
+          onClick={() => setShowGuessMap(true)}
+          className="absolute top-20 left-4 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-black transition-all z-20 flex items-center gap-2 font-semibold shadow-lg"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {guess ? 'Change Guess' : 'Make Guess'}
+        </button>
       )}
 
-      {/* Guess Map */}
+      {/* Guess Map - Handles Submission and Result Display internally now */}
       <GuessMap 
         onGuess={handleGuess} 
         disabled={showResult} 
         isOpen={showGuessMap} 
         onClose={() => setShowGuessMap(false)} 
-        currentGuess={guess} 
+        currentGuess={guess}
+        // New Props for Result Flow
+        showResult={showResult}
+        actualLocation={currentLocation}
+        result={currentResult}
+        onSubmit={() => submitGuess(guess)}
       />
 
-      {/* Round Result Overlay */}
+      {/* Round Result Overlay - Displayed on top of everything when result is ready */}
       {showResult && currentResult && (
         <RoundResult result={currentResult} onNextRound={handleNextRound} />
       )}
