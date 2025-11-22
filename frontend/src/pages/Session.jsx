@@ -12,7 +12,7 @@ function Session() {
   const location = useLocation();
   const navigate = useNavigate();
   const gameId = location.state?.gameId;
-
+  
   const [currentRound, setCurrentRound] = useState(0);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [guess, setGuess] = useState(null);
