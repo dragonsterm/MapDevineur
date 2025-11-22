@@ -6,38 +6,74 @@ function GuessMap({ onGuess, disabled, isOpen, onClose, currentGuess }) {
   const markerRef = useRef(null);
   const [hasGuessed, setHasGuessed] = useState(false);
   const [isApiReady, setIsApiReady] = useState(false);
+  const [markerLibrary, setMarkerLibrary] = useState(null);
 
   useEffect(() => {
-    const checkGoogleMaps = () => {
+    const styleId = 'custom-marker-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        .custom-marker-pin {
+          width: 30px;
+          height: 30px;
+          border-radius: 50% 50% 50% 0;
+          background: #007bff;
+          position: absolute;
+          transform: rotate(-45deg);
+          left: 50%;
+          top: 50%;
+          margin: -20px 0 0 -15px;
+          animation: bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite alternate;
+        }
+        .custom-marker-pin::after {
+          content: '';
+          width: 14px;
+          height: 14px;
+          margin: 8px 0 0 8px;
+          background: #fff;
+          position: absolute;
+          border-radius: 50%;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  useEffect(() => {
+    const loadGoogleMaps = async () => {
       if (window.google && window.google.maps) {
+        const { AdvancedMarkerElement } = await window.google.maps.importLibrary("marker");
+        setMarkerLibrary({ AdvancedMarkerElement });
         setIsApiReady(true);
         return true;
       }
       return false;
     };
 
-    if (checkGoogleMaps()) {
+    if (loadGoogleMaps()) {
       return;
     }
 
     const interval = setInterval(() => {
-      if (checkGoogleMaps()) {
+      if (loadGoogleMaps()) {
         clearInterval(interval);
       }
     }, 100);
 
     return () => clearInterval(interval);
   }, []);
-
+  
   useEffect(() => {
-    if (isOpen && isApiReady && mapRef.current && !mapInstanceRef.current) {
+    if (isOpen && isApiReady && markerLibrary && mapRef.current && !mapInstanceRef.current) {
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: 20, lng: 0 },
         zoom: 2,
         mapTypeControl: true,
         streetViewControl: false,
         fullscreenControl: true,
-        mapTypeId: 'roadmap',
+        mapId: 'DEMO_MAP_ID',
+        clickableIcons: false, // Disables clicking on POIs
         restriction: {
           latLngBounds: {
             north: 85,
@@ -61,19 +97,31 @@ function GuessMap({ onGuess, disabled, isOpen, onClose, currentGuess }) {
         window.google.maps.event.removeListener(clickListener);
       };
     }
-  }, [isOpen, isApiReady, disabled]);
+  }, [isOpen, isApiReady, disabled, markerLibrary]);
 
   const placeMarker = (latLng) => {
     if (markerRef.current) {
-      markerRef.current.setMap(null);
+      markerRef.current.map = null;
     }
 
-    const newMarker = new window.google.maps.Marker({
+    const pinElement = document.createElement('div');
+    pinElement.className = 'custom-marker-pin';
+
+    const newMarker = new markerLibrary.AdvancedMarkerElement({
       position: latLng,
       map: mapInstanceRef.current,
-      draggable: true,
-      animation: window.google.maps.Animation.DROP,
+      gmpDraggable: true,
+      content: pinElement,
+      title: 'Your Guess'
     });
+
+    mapInstanceRef.current.panTo(latLng);
+
+    const currentZoom = mapInstanceRef.current.getZoom();
+    const minSnapZoom = 5;
+    if (currentZoom < minSnapZoom) {
+      mapInstanceRef.current.setZoom(minSnapZoom);
+    }
 
     markerRef.current = newMarker;
     setHasGuessed(true);
@@ -83,10 +131,10 @@ function GuessMap({ onGuess, disabled, isOpen, onClose, currentGuess }) {
       lng: latLng.lng(),
     });
 
-    newMarker.addListener('dragend', (e) => {
+    newMarker.addEventListener('dragend', (e) => {
       onGuess({
-        lat: e.latLng.lat(),
-        lng: e.latLng.lng(),
+        lat: newMarker.position.lat,
+        lng: newMarker.position.lng,
       });
     });
   };
@@ -94,7 +142,9 @@ function GuessMap({ onGuess, disabled, isOpen, onClose, currentGuess }) {
   useEffect(() => {
     if (isOpen && currentGuess && mapInstanceRef.current) {
       const latLng = new window.google.maps.LatLng(currentGuess.lat, currentGuess.lng);
-      placeMarker(latLng);
+      if (!markerRef.current) {
+        placeMarker(latLng);
+      }
     }
   }, [isOpen, currentGuess]);
 
@@ -109,7 +159,7 @@ function GuessMap({ onGuess, disabled, isOpen, onClose, currentGuess }) {
   useEffect(() => {
     if (!isOpen) {
       if (markerRef.current) {
-        markerRef.current.setMap(null);
+        markerRef.current.map = null;
         markerRef.current = null;
       }
       mapInstanceRef.current = null;

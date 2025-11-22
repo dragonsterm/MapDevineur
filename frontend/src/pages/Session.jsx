@@ -314,6 +314,7 @@ function Session() {
         disabled={showResult}
         isOpen={showGuessMap}
         onClose={handleCloseGuessMap}
+        currentGuess={guess}
       />
 
       {/* Round Result Modal */}
