@@ -279,7 +279,7 @@ function GuessMap({
   }, [showResult, actualLocation, markerLibrary, currentGuess]);
 
   const getContainerClass = () => {
-    const base = "fixed z-40 shadow-2xl overflow-hidden map-container-transition ";
+    const base = "fixed z-30 shadow-2xl overflow-hidden map-container-transition ";
     switch (viewState) {
       case 'fullscreen':
         return base + "inset-0 w-full h-full rounded-none";
@@ -353,7 +353,7 @@ function GuessMap({
 
             {/* Fullscreen UI */}
             {viewState === 'fullscreen' && (
-                <div className="absolute top-6 right-6 z-50">
+                <div className="absolute top-24 right-6 z-50">
                     <button 
                         onClick={toggleFullscreen}
                         className="glass-icon-btn red-hover w-12 h-12 rounded-lg shadow-lg"
