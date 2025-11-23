@@ -14,8 +14,6 @@ function GuessMap({
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const userMarkerRef = useRef(null);
-  
-  // Refs for result visualization
   const actualMarkerRef = useRef(null);
   const polylineRef = useRef(null);
   const distanceLabelRef = useRef(null);
@@ -289,7 +287,7 @@ function GuessMap({
         return base + "bottom-6 left-6 map-size-expanded";
       case 'minimized':
       default:
-        return base + "bottom-[72px] left-6 map-size-minimized cursor-pointer hover:opacity-100 opacity-90 border-2 border-white/10";
+        return base + "bottom-[75px] left-6 map-size-minimized cursor-pointer hover:opacity-100 opacity-90";
     }
   };
 
@@ -403,7 +401,7 @@ function GuessMap({
                         }
                     `}
                 >
-                    {hasGuessed ? "Guess" : "Click the map to make a guess"}
+                    {hasGuessed ? "Guess" : "Drop your pin on the map"}
                 </button>
             </div>
         )}

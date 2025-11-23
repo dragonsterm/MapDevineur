@@ -7,6 +7,7 @@ import RoundResult from '../components/Game/RoundResult';
 import GameSummary from '../components/Game/GameSummary';
 import { loadGoogleMaps } from '../services/googleMapsLoader';
 import { getRandomLocations, submitRound, completeGame } from '../services/gameService';
+import '../styles/gameStyles.css';
 
 function Session() {
   const location = useLocation();
@@ -54,7 +55,6 @@ function Session() {
           setError(null);
           setGuess(null);
           setShowResult(false);
-          // Note: We don't toggle a 'showGuessMap' anymore, the map persists
         }
 
         const data = await getRandomLocations(1);
@@ -171,14 +171,25 @@ function Session() {
         </div>
       )}
 
-      {/* Header Timer */}
+      {/* GAME UI */}
       {!isLoading && (
-        <div className="bg-gray-900/80 backdrop-blur border-b border-gray-800 p-4 flex justify-between items-center z-20 shrink-0 relative transition-opacity duration-500">
-          <div className="text-white font-semibold text-lg">
-            Round {currentRound + 1} of 5
-          </div>
-          <Timer key={currentRound} duration={120} onTimeUp={handleTimeUp} isRunning={!showResult && !isLoading} />
-        </div>
+        <>
+            {/* Round Info Box */}
+            <div className="round-info-box">
+                <div className="round-label">ROUND</div>
+                <div className="round-value">{currentRound + 1}/5</div>
+            </div>
+
+            {/* Timer */}
+            <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-40">
+                <Timer 
+                    key={currentRound} 
+                    duration={120} 
+                    onTimeUp={handleTimeUp} 
+                    isRunning={!showResult && !isLoading} 
+                />
+            </div>
+        </>
       )}
 
       {/* Guess Map */}
