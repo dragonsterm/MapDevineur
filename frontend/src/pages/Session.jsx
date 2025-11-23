@@ -24,7 +24,6 @@ function Session() {
   const [roundStartTime, setRoundStartTime] = useState(Date.now());
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showGuessMap, setShowGuessMap] = useState(false);
   const [isMapsReady, setIsMapsReady] = useState(false);
 
   useEffect(() => {
@@ -54,8 +53,8 @@ function Session() {
           setIsLoading(true);
           setError(null);
           setGuess(null);
-          setShowResult(false); // Ensure result is hidden on new round
-          setShowGuessMap(false); // Ensure map is closed on new round
+          setShowResult(false);
+          // Note: We don't toggle a 'showGuessMap' anymore, the map persists
         }
 
         const data = await getRandomLocations(1);
@@ -113,7 +112,6 @@ function Session() {
       setCurrentResult(result.round);
       setRoundResults([...roundResults, result.round]);
       setShowResult(true); 
-      setShowGuessMap(true);
 
     } catch (error) {
       console.error('Failed to submit round:', error);
@@ -123,7 +121,6 @@ function Session() {
 
   const handleNextRound = () => {
     setShowResult(false);
-    setShowGuessMap(false);
     setError(null);
     setCurrentResult(null);
 
@@ -157,7 +154,7 @@ function Session() {
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-black">
-      {/* Map Layer */}
+      {/* Map Layer*/}
       <div className="absolute inset-0 z-0">
         {isMapsReady && currentLocation && (
            <StreetView location={currentLocation} />
@@ -169,14 +166,14 @@ function Session() {
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
           <div className="w-12 h-12 border-4 border-gray-800 border-t-blue-500 rounded-full animate-spin mb-4" />
           <p className="text-white text-lg">
-            {!isMapsReady ? 'Initializing Maps...' : `Loading Round ${currentRound + 1}...`}
+            {!isMapsReady ? 'Initializing Maps...' : `Loading Round...`}
           </p>
         </div>
       )}
 
       {/* Header Timer */}
       {!isLoading && (
-        <div className="bg-gray-900/80 backdrop-blur border-b border-gray-800 p-4 flex justify-between items-center z-20 shrink-0 relative">
+        <div className="bg-gray-900/80 backdrop-blur border-b border-gray-800 p-4 flex justify-between items-center z-20 shrink-0 relative transition-opacity duration-500">
           <div className="text-white font-semibold text-lg">
             Round {currentRound + 1} of 5
           </div>
@@ -184,26 +181,11 @@ function Session() {
         </div>
       )}
 
-      {/* Main */}
-      {!isLoading && !showResult && currentLocation && (
-        <button
-          onClick={() => setShowGuessMap(true)}
-          className="absolute top-20 left-4 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg border border-white/20 hover:bg-black transition-all z-20 flex items-center gap-2 font-semibold shadow-lg"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          {guess ? 'Change Guess' : 'Make Guess'}
-        </button>
-      )}
-
       {/* Guess Map */}
       <GuessMap 
+        roundId={currentRound} 
         onGuess={handleGuess} 
         disabled={showResult} 
-        isOpen={showGuessMap} 
-        onClose={() => setShowGuessMap(false)} 
         currentGuess={guess}
         showResult={showResult}
         actualLocation={currentLocation}

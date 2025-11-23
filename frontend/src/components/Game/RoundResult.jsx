@@ -1,32 +1,64 @@
+import { useEffect } from 'react';
+import '../../styles/gameStyles.css';
+
 function RoundResult({ result, onNextRound }) {
+  const maxScore = 6000; 
+  let progressPercentage = (result.round_score / maxScore) * 100;
+
+  if (result.round_score < maxScore && progressPercentage > 98) {
+    progressPercentage = 98;
+  }
+  
+  progressPercentage = Math.min(100, progressPercentage);
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        onNextRound();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [onNextRound]);
+
   return (
-    <div className="fixed inset-0 z-[60] pointer-events-none flex items-end justify-center pb-12">
-      <div className="bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl pointer-events-auto transform transition-all animate-slide-up">
-        <h2 className="text-2xl font-bold text-white mb-4 text-center">
-          Round Complete!
-        </h2>
+    <div className="round-result-container">
+      <div className="round-result-card">
         
-        <div className="grid grid-cols-3 gap-4 mb-6 text-center">
-          <div className="bg-gray-800/50 rounded-lg p-2">
-            <div className="text-gray-400 text-xs uppercase mb-1">Distance</div>
-            <div className="text-white font-bold">{result.distance.toFixed(1)} km</div>
-          </div>
-          <div className="bg-gray-800/50 rounded-lg p-2">
-            <div className="text-gray-400 text-xs uppercase mb-1">Time</div>
-            <div className="text-white font-bold">{result.time_taken}s</div>
-          </div>
-          <div className="bg-gray-800/50 rounded-lg p-2 border border-blue-500/30">
-            <div className="text-blue-400 text-xs uppercase mb-1">Score</div>
-            <div className="text-blue-400 font-bold text-lg">{result.round_score}</div>
-          </div>
+        {/* Score */}
+        <h2 className="round-score">
+          {Math.round(result.round_score)} points
+        </h2>
+
+        {/* Progress Bar */}
+        <div className="round-progress-track">
+          <div 
+            className="round-progress-fill" 
+            style={{ width: `${progressPercentage}%` }} 
+          />
         </div>
 
-        <button
-          onClick={onNextRound}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95"
-        >
-          Next Round
+        {/* Distance Info */}
+        <div className="round-distance-text">
+          Your guess was
+          <span className="round-distance-badge">
+            {result.distance.toFixed(1)} KM
+          </span>
+          from the location
+        </div>
+
+        {/* Button */}
+        <button onClick={onNextRound} className="round-next-btn">
+          Start Next Round
         </button>
+
+        {/* Keyboard Hint */}
+        <div className="round-keyboard-hint">
+          Hit <span className="round-key-badge">SPACE</span> to continue
+        </div>
+
       </div>
     </div>
   );
