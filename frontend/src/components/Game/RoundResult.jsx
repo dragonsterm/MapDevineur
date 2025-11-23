@@ -1,6 +1,5 @@
 function RoundResult({ result, onNextRound }) {
   return (
-    // Changed: Positioned at bottom-middle, transparent background, pointer-events-none to let clicks pass through to map
     <div className="fixed inset-0 z-[60] pointer-events-none flex items-end justify-center pb-12">
       <div className="bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl pointer-events-auto transform transition-all animate-slide-up">
         <h2 className="text-2xl font-bold text-white mb-4 text-center">

@@ -24,7 +24,6 @@ function GuessMap({
   const [isApiReady, setIsApiReady] = useState(false);
   const [markerLibrary, setMarkerLibrary] = useState(null);
 
-  // Inject CSS for markers (Blue for user, Green for result)
   useEffect(() => {
     const styleId = 'custom-marker-styles';
     if (!document.getElementById(styleId)) {
@@ -78,7 +77,6 @@ function GuessMap({
     }
   }, []);
 
-  // Load Google Maps
   useEffect(() => {
     const loadGoogleMaps = async () => {
       if (window.google && window.google.maps) {
@@ -99,7 +97,6 @@ function GuessMap({
     return () => clearInterval(interval);
   }, []);
   
-  // Initialize Map
   useEffect(() => {
     if (isOpen && isApiReady && markerLibrary && mapRef.current && !mapInstanceRef.current) {
       const map = new window.google.maps.Map(mapRef.current, {
@@ -119,7 +116,6 @@ function GuessMap({
       mapInstanceRef.current = map;
 
       const clickListener = map.addListener('click', (event) => {
-        // Only allow placing markers if we are NOT showing results
         if (!disabled && !showResult) {
           placeMarker(event.latLng);
         }
@@ -131,7 +127,6 @@ function GuessMap({
     }
   }, [isOpen, isApiReady, disabled, markerLibrary, showResult]);
 
-  // Logic to place the User's Guess Marker
   const placeMarker = (latLng) => {
     if (userMarkerRef.current) {
       userMarkerRef.current.map = null;
@@ -149,7 +144,6 @@ function GuessMap({
       zIndex: 10
     });
 
-    // Only pan if it's the user manually placing it, not resizing for result
     if (!showResult) {
       mapInstanceRef.current.panTo(latLng);
     }
@@ -162,8 +156,7 @@ function GuessMap({
 
     userMarkerRef.current = newMarker;
     setHasGuessed(true);
-    
-    // Safety check if latLng is a function (from click event) or object (from manual set)
+  
     const lat = typeof latLng.lat === 'function' ? latLng.lat() : latLng.lat;
     const lng = typeof latLng.lng === 'function' ? latLng.lng() : latLng.lng;
 
@@ -179,7 +172,6 @@ function GuessMap({
     });
   };
 
-  // Sync marker if guess exists (e.g. from state restoration)
   useEffect(() => {
     if (isOpen && currentGuess && mapInstanceRef.current && !userMarkerRef.current) {
       const latLng = new window.google.maps.LatLng(currentGuess.lat, currentGuess.lng);
@@ -187,7 +179,6 @@ function GuessMap({
     }
   }, [isOpen, currentGuess]);
 
-  // RESULT VISUALIZATION LOGIC
   useEffect(() => {
     if (isOpen && showResult && actualLocation && mapInstanceRef.current && markerLibrary && currentGuess) {
       
@@ -195,9 +186,8 @@ function GuessMap({
       const guessLatLng = { lat: currentGuess.lat, lng: currentGuess.lng };
       const actualLatLng = { lat: parseFloat(actualLocation.latitude), lng: parseFloat(actualLocation.longitude) };
 
-      // 1. Create Green Marker for Actual Location
       const actualPin = document.createElement('div');
-      actualPin.className = 'custom-marker-pin actual'; // Green style
+      actualPin.className = 'custom-marker-pin actual';
       
       const actualMarker = new markerLibrary.AdvancedMarkerElement({
         position: actualLatLng,
@@ -207,7 +197,6 @@ function GuessMap({
       });
       actualMarkerRef.current = actualMarker;
 
-      // 2. Draw Dashed Line
       const lineSymbol = {
         path: 'M 0,-1 0,1',
         strokeOpacity: 1,
@@ -223,16 +212,12 @@ function GuessMap({
           repeat: '20px'
         }],
         map: map,
-        strokeColor: '#10B981' // Green line
+        strokeColor: '#10B981'
       });
       polylineRef.current = polyline;
 
-      // 3. Add Distance Label at midpoint
-      // Simple midpoint calculation
       const midLat = (guessLatLng.lat + actualLatLng.lat) / 2;
       const midLng = (guessLatLng.lng + actualLatLng.lng) / 2;
-      // Note: This is a simple linear midpoint. For long distances across the dateline or poles 
-      // it might be slightly off visually, but sufficient for this game context.
       
       const labelDiv = document.createElement('div');
       labelDiv.className = 'distance-label';
@@ -245,18 +230,16 @@ function GuessMap({
         zIndex: 100
       });
       distanceLabelRef.current = labelMarker;
-
-      // 4. Fit Bounds to show both markers
+      
       const bounds = new window.google.maps.LatLngBounds();
       bounds.extend(guessLatLng);
       bounds.extend(actualLatLng);
       map.fitBounds(bounds, {
-        top: 100, right: 100, bottom: 200, left: 100 // Extra bottom padding for the result card
+        top: 100, right: 100, bottom: 200, left: 100 
       });
     }
   }, [isOpen, showResult, actualLocation, markerLibrary]);
 
-  // Handle Resize
   useEffect(() => {
     if (isOpen && mapInstanceRef.current) {
       setTimeout(() => {
@@ -265,15 +248,12 @@ function GuessMap({
     }
   }, [isOpen]);
 
-  // Clean up on Close (Reset)
   useEffect(() => {
     if (!isOpen) {
-      // Clear User Marker
       if (userMarkerRef.current) {
         userMarkerRef.current.map = null;
         userMarkerRef.current = null;
       }
-      // Clear Result Elements
       if (actualMarkerRef.current) {
         actualMarkerRef.current.map = null;
         actualMarkerRef.current = null;
@@ -305,7 +285,7 @@ function GuessMap({
           </svg>
           {showResult ? 'Round Results' : 'Make Your Guess'}
         </h2>
-        {/* Only show Close button if result is NOT shown, or if you want to allow closing during result view (optional, keeping it for safety) */}
+        {/* close button */}
         {!showResult && (
           <button
             onClick={onClose}
@@ -320,14 +300,14 @@ function GuessMap({
       <div className="flex-1 relative">
         <div ref={mapRef} className="w-full h-full" />
         
-        {/* Instructions (Only if not guessed and not result) */}
+        {/* Instructions */}
         {!hasGuessed && !showResult && (
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur text-white px-6 py-3 rounded-full shadow-2xl border border-gray-700 pointer-events-none">
             <p className="font-medium text-sm">Click anywhere to place guess</p>
           </div>
         )}
 
-        {/* SUBMIT BUTTON - GREEN (Only show if guessed and result NOT shown) */}
+        {/* secon subtmit button */}
         {hasGuessed && !showResult && (
           <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20">
             <button

@@ -112,10 +112,7 @@ function Session() {
 
       setCurrentResult(result.round);
       setRoundResults([...roundResults, result.round]);
-      
-      // KEY CHANGE: Don't close map. Enable Result Mode.
       setShowResult(true); 
-      // Ensure GuessMap is visible (if triggered by Timer)
       setShowGuessMap(true);
 
     } catch (error) {
@@ -125,10 +122,8 @@ function Session() {
   };
 
   const handleNextRound = () => {
-    // Reset states for next round
     setShowResult(false);
-    setShowGuessMap(false); // Close map to reset markers in useEffect cleanup
-    setGuess(null);
+    setShowGuessMap(false);
     setError(null);
     setCurrentResult(null);
 
@@ -162,7 +157,7 @@ function Session() {
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-black">
-      {/* Map Layer (Background) */}
+      {/* Map Layer */}
       <div className="absolute inset-0 z-0">
         {isMapsReady && currentLocation && (
            <StreetView location={currentLocation} />
@@ -189,7 +184,7 @@ function Session() {
         </div>
       )}
 
-      {/* Main "Make Guess" Button (Only visible if map is closed and not in result mode) */}
+      {/* Main */}
       {!isLoading && !showResult && currentLocation && (
         <button
           onClick={() => setShowGuessMap(true)}
@@ -203,21 +198,20 @@ function Session() {
         </button>
       )}
 
-      {/* Guess Map - Handles Submission and Result Display internally now */}
+      {/* Guess Map */}
       <GuessMap 
         onGuess={handleGuess} 
         disabled={showResult} 
         isOpen={showGuessMap} 
         onClose={() => setShowGuessMap(false)} 
         currentGuess={guess}
-        // New Props for Result Flow
         showResult={showResult}
         actualLocation={currentLocation}
         result={currentResult}
         onSubmit={() => submitGuess(guess)}
       />
 
-      {/* Round Result Overlay - Displayed on top of everything when result is ready */}
+      {/* Round Result Overlay */}
       {showResult && currentResult && (
         <RoundResult result={currentResult} onNextRound={handleNextRound} />
       )}
