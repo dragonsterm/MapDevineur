@@ -9,12 +9,18 @@ function Home() {
   const [openFaq, setOpenFaq] = useState(null);
   const [gameModeSlide, setGameModeSlide] = useState(0);
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const { login, user, initializing } = useAuth();
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [formErrors, setFormErrors] = useState({});
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (!initializing && user) {
+      navigate('/game', { replace: true });
+    }
+  }, [initializing, user, navigate]);
 
   const features = [
     {
@@ -108,25 +114,6 @@ function Home() {
     )
   }
 ];
-
-  const gameFeatures = [
-    {
-      title: "Google Street View",
-      description: "Explore real locations using authentic Street View imagery"
-    },
-    {
-      title: "Interactive Maps",
-      description: "Make your guess on an intuitive, interactive world map"
-    },
-    {
-      title: "60 Second Timer",
-      description: "Race against time to maximize your score each round"
-    },
-    {
-      title: "25+ Locations",
-      description: "Diverse locations spanning all continents and difficulty levels"
-    }
-  ];
 
   const faqs = [
     {
@@ -271,6 +258,14 @@ function Home() {
       setIsSubmitting(false);
     }
   };
+  
+  if (initializing) {
+    return (
+      <div className="test-container">
+        <div className="test-background-glow"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="test-container">
