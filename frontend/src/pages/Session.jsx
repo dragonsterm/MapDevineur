@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import StreetView from '../components/Game/StreetView';
 import GuessMap from '../components/Game/GuessMap';
 import Timer from '../components/Game/Timer';
+import Compass from '../components/Game/Compass';
 import RoundResult from '../components/Game/RoundResult';
 import GameSummary from '../components/Game/GameSummary';
 import { loadGoogleMaps } from '../services/googleMapsLoader';
@@ -13,7 +14,8 @@ function Session() {
   const location = useLocation();
   const navigate = useNavigate();
   const gameId = location.state?.gameId;
-  
+  const streetViewRef = useRef(null);
+
   const [currentRound, setCurrentRound] = useState(0);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [guess, setGuess] = useState(null);
@@ -26,6 +28,7 @@ function Session() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMapsReady, setIsMapsReady] = useState(false);
+  const [heading, setHeading] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -55,6 +58,7 @@ function Session() {
           setError(null);
           setGuess(null);
           setShowResult(false);
+          setHeading(0);
         }
 
         const data = await getRandomLocations(1);
@@ -148,6 +152,12 @@ function Session() {
     submitGuess(guessForSubmit);
   };
 
+  const handleResetLocation = useCallback(() => {
+    if (streetViewRef.current) {
+        streetViewRef.current.resetView();
+    }
+  }, []);
+
   if (isGameComplete) {
     return <GameSummary totalScore={totalScore} rounds={roundResults} />;
   }
@@ -157,7 +167,11 @@ function Session() {
       {/* Map Layer*/}
       <div className="absolute inset-0 z-0">
         {isMapsReady && currentLocation && (
-           <StreetView location={currentLocation} />
+           <StreetView 
+                ref={streetViewRef}
+                location={currentLocation} 
+                onHeadingChange={setHeading}
+           />
         )}
       </div>
 
@@ -180,8 +194,27 @@ function Session() {
                 <div className="round-value">{currentRound + 1}/5</div>
             </div>
 
-            {/* Timer */}
+            {/* Reset Location */}
+            <div className="absolute top-6 left-6 z-40">
+                <button 
+                    onClick={handleResetLocation}
+                    className="reset-location-btn group"
+                    title="Return to start"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                        <path d="M3 3v5h5" />
+                    </svg>
+                </button>
+            </div>
+
+            {/* Compass */}
             <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-40">
+                <Compass heading={heading} />
+            </div>
+
+            {/* Timer */}
+            <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-40">
                 <Timer 
                     key={currentRound} 
                     duration={120} 

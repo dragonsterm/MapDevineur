@@ -1,10 +1,23 @@
-import { useEffect, useRef, useState, memo } from 'react';
+import { useEffect, useRef, useState, memo, forwardRef, useImperativeHandle } from 'react';
 import { loadGoogleMaps } from '../../services/googleMapsLoader';
 
-function StreetView({ location }) {
+const StreetView = forwardRef(({ location, onHeadingChange }, ref) => {
   const streetViewRef = useRef(null);
   const panoramaRef = useRef(null);
+  const initialPanoIdRef = useRef(null); 
   const [isApiReady, setIsApiReady] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    resetView: () => {
+      if (panoramaRef.current && initialPanoIdRef.current) {
+         panoramaRef.current.setPano(initialPanoIdRef.current);
+         panoramaRef.current.setPov({ heading: 0, pitch: 0 });
+         panoramaRef.current.setZoom(0);
+         
+         if (onHeadingChange) onHeadingChange(0);
+      }
+    }
+  }));
 
   useEffect(() => {
     loadGoogleMaps()
@@ -21,14 +34,14 @@ function StreetView({ location }) {
 
     console.log('[Street View] Initializing new Panorama instance');
     
-    panoramaRef.current = new window.google.maps.StreetViewPanorama(
+    const panorama = new window.google.maps.StreetViewPanorama(
       streetViewRef.current,
       {
         pov: { heading: 0, pitch: 0 },
         zoom: 0,
         addressControl: false,
         linksControl: true,      
-        panControl: true,
+        panControl: false,
         clickToGo: true,     
         enableCloseButton: false,
         showRoadLabels: false,
@@ -39,7 +52,17 @@ function StreetView({ location }) {
       }
     );
 
+    panoramaRef.current = panorama;
+
+    const listener = panorama.addListener('pov_changed', () => {
+        const pov = panorama.getPov();
+        if (onHeadingChange) {
+            onHeadingChange(pov.heading);
+        }
+    });
+
     return () => {
+      window.google.maps.event.removeListener(listener);
       panoramaRef.current = null;
     };
   }, [isApiReady]);
@@ -51,6 +74,8 @@ function StreetView({ location }) {
     const lng = parseFloat(location.longitude);
 
     if (isNaN(lat) || isNaN(lng)) return;
+
+    initialPanoIdRef.current = null;
 
     const svService = new window.google.maps.StreetViewService();
     
@@ -64,23 +89,26 @@ function StreetView({ location }) {
       .then(({ data }) => {
         const panoId = data.location.pano;
         
-        if (panoramaRef.current.getPano() === panoId) return;
+        initialPanoIdRef.current = panoId;
 
-        console.log('[Street View] Found Valid Outdoor Pano ID:', panoId);
+        if (panoramaRef.current.getPano() === panoId) return;
         
         panoramaRef.current.setPano(panoId);
         panoramaRef.current.setPov({ heading: 0, pitch: 0 });
         panoramaRef.current.setVisible(true);
 
+        if (onHeadingChange) onHeadingChange(0);
+
         window.google.maps.event.trigger(panoramaRef.current, 'resize');
       })
       .catch((err) => {
-        console.warn('[Street View] No outdoor street view found here, retrying without filter...', err);
+        console.warn('[Street View] No outdoor street view found, retrying loose search...', err);
         return svService.getPanorama({ location: { lat, lng }, radius: 50 });
       })
       .then((result) => {
         if (result && result.data) {
            const panoId = result.data.location.pano;
+           initialPanoIdRef.current = panoId;
            panoramaRef.current.setPano(panoId);
            panoramaRef.current.setVisible(true);
         }
@@ -106,7 +134,7 @@ function StreetView({ location }) {
       style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, background: '#000' }}
     />
   );
-}
+});
 
 export default memo(StreetView, (prevProps, nextProps) => {
   return prevProps.location?.id === nextProps.location?.id;
