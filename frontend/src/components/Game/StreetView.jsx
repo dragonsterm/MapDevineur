@@ -75,6 +75,13 @@ const StreetView = forwardRef(({ location, onHeadingChange }, ref) => {
 
     if (isNaN(lat) || isNaN(lng)) return;
 
+    if (panoramaRef.current.getPosition()) {
+        const currentPos = panoramaRef.current.getPosition();
+        if (Math.abs(currentPos.lat() - lat) < 0.0001 && Math.abs(currentPos.lng() - lng) < 0.0001) {
+            return; 
+        }
+    }
+
     initialPanoIdRef.current = null;
 
     const svService = new window.google.maps.StreetViewService();
@@ -118,7 +125,7 @@ const StreetView = forwardRef(({ location, onHeadingChange }, ref) => {
          panoramaRef.current.setVisible(false);
       });
 
-  }, [location, isApiReady]);
+  }, [location?.id, isApiReady]); 
 
   if (!isApiReady) {
     return (
