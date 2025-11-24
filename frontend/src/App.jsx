@@ -9,6 +9,7 @@ import Session from './pages/Session';
 import Registration from './pages/Registration';
 import Loading from './pages/Loading';
 import ResetPassword from './pages/ResetPassword';
+import UserProfile from './pages/UserProfile';
 
 function App() {
   useEffect(() => {
@@ -50,6 +51,12 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/profile/:userId" element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/test" element={<Test />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>

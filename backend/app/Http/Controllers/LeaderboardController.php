@@ -10,7 +10,6 @@ class LeaderboardController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 10);
-
         $scores = Score::with(['user.gameProfile'])
             ->orderBy('score', 'desc')
             ->orderBy('created_at', 'asc')
@@ -25,8 +24,9 @@ class LeaderboardController extends Controller
 
                 return [
                     'rank' => $scores->firstItem() + $index,
-                    'username' => $score->user->username,
-                    'display_name' => $displayName,
+                    'user_id' => $score->user_id, // Added ID for linking
+                    'username' => $score->user->username, 
+                    'display_name' => $displayName,      
                     'score' => $score->score,
                     'created_at' => $score->created_at->toDateTimeString(),
                 ];
@@ -58,5 +58,3 @@ class LeaderboardController extends Controller
         ]);
     }
 }
-
-?>

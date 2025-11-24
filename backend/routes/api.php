@@ -16,6 +16,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/game-profile', [GameProfileController::class, 'show']);
     Route::post('/game-profile', [GameProfileController::class, 'store']);
+    Route::put('/game-profile', [GameProfileController::class, 'update']);
+    Route::delete('/game-profile', [GameProfileController::class, 'destroy']);
+    Route::get('/game-profile/{userId}', [GameProfileController::class, 'getPublicProfile']);
 
     Route::get('/locations/random', [LocationController::class, 'getRandom']);
 

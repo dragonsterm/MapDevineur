@@ -21,6 +21,9 @@ class GameProfile extends Model
         'display_name',
         'country',
         'gender',
+        'bio',
+        'date_of_birth',
+        'avatar',
     ];
 
     public function user()

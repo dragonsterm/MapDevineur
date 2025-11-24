@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('display_name');
             $table->string('country');
             $table->enum('gender', ['male', 'female', 'not specify']);
+            $table->text('bio')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('avatar')->default('dino_idle');
             $table->timestamps();
         });
     }
