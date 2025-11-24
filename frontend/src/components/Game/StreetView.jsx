@@ -41,7 +41,7 @@ const StreetView = forwardRef(({ location, onHeadingChange }, ref) => {
         zoom: 0,
         addressControl: false,
         linksControl: true,      
-        panControl: false,
+        panControl: true,
         clickToGo: true,     
         enableCloseButton: false,
         showRoadLabels: false,

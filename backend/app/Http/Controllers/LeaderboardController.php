@@ -11,16 +11,22 @@ class LeaderboardController extends Controller
     {
         $perPage = $request->query('per_page', 10);
 
-        $scores = Score::with('user:id,username')
+        $scores = Score::with(['user.gameProfile'])
             ->orderBy('score', 'desc')
             ->orderBy('created_at', 'asc')
             ->paginate($perPage);
 
         return response()->json([
             'leaderboard' => $scores->map(function ($score, $index) use ($scores) {
+                $profile = $score->user->gameProfile;
+                $displayName = $profile 
+                    ? $profile->display_name . '#' . $profile->id 
+                    : $score->user->username;
+
                 return [
                     'rank' => $scores->firstItem() + $index,
                     'username' => $score->user->username,
+                    'display_name' => $displayName,
                     'score' => $score->score,
                     'created_at' => $score->created_at->toDateTimeString(),
                 ];
@@ -37,7 +43,7 @@ class LeaderboardController extends Controller
     public function userScores($id)
     {
         $scores = Score::where('user_id', $id)
-            ->with('user:id,username')
+            ->with(['user.gameProfile'])
             ->orderBy('score', 'desc')
             ->limit(10)
             ->get();

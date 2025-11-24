@@ -25,6 +25,8 @@ return [
         'locations/*',
         'leaderboard',
         'leaderboard/*',
+        'game-profile',
+        'game-profile/*',
     ],
 
     'allowed_methods' => ['*'],

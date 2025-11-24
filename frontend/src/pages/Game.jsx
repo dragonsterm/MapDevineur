@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import { createGame } from '../services/gameService';
 import apiClient from '../services/api';
+import GameProfileModal from '../components/Profile/GameProfileModal';
 
 function Game() {
   const { user, logout } = useAuth();
@@ -10,10 +11,28 @@ function Game() {
   const [isStarting, setIsStarting] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+  
+  // Profile State
+  const [gameProfile, setGameProfile] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     fetchLeaderboard();
+    checkGameProfile();
   }, []);
+
+  const checkGameProfile = async () => {
+    try {
+      const { data } = await apiClient.get('/api/game-profile');
+      if (data.profile) {
+        setGameProfile(data.profile);
+      } else {
+        setShowProfileModal(true);
+      }
+    } catch (error) {
+      setShowProfileModal(true);
+    }
+  };
 
   const fetchLeaderboard = async () => {
     try {
@@ -33,6 +52,10 @@ function Game() {
   };
 
   const handleStartGame = async () => {
+    if (!gameProfile) {
+        setShowProfileModal(true);
+        return;
+    }
     setIsStarting(true);
     try {
       const gameData = await createGame();
@@ -43,13 +66,29 @@ function Game() {
     }
   };
 
+  const handleProfileSuccess = (newProfile) => {
+    setGameProfile(newProfile);
+    setShowProfileModal(false);
+    fetchLeaderboard();
+  };
+
   return (
-    <main style={{ minHeight: '100vh', background: '#000', color: '#fff', padding: '40px 20px' }}>
+    <main style={{ minHeight: '100vh', background: '#000', color: '#fff', padding: '40px 20px', position: 'relative' }}>
+      
+      <GameProfileModal 
+        isOpen={showProfileModal} 
+        onSuccess={handleProfileSuccess} 
+      />
+
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '10px' }}>
-            Welcome, {user?.username}!
+            {gameProfile ? (
+                <>Hi, <span style={{ color: '#60A5FA' }}>{gameProfile.display_name}#{gameProfile.id}</span></>
+            ) : (
+                <>Welcome, {user?.username}!</>
+            )}
           </h1>
           <button
             onClick={handleLogout}
@@ -84,7 +123,7 @@ function Game() {
             </p>
             <button
               onClick={handleStartGame}
-              disabled={isStarting}
+              disabled={isStarting || showProfileModal}
               style={{
                 background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)',
                 border: 'none',
@@ -93,8 +132,8 @@ function Game() {
                 borderRadius: '8px',
                 fontSize: '18px',
                 fontWeight: 'bold',
-                cursor: isStarting ? 'not-allowed' : 'pointer',
-                opacity: isStarting ? 0.6 : 1
+                cursor: (isStarting || showProfileModal) ? 'not-allowed' : 'pointer',
+                opacity: (isStarting || showProfileModal) ? 0.6 : 1
               }}
             >
               {isStarting ? 'Starting...' : 'Play Now'}
@@ -109,7 +148,7 @@ function Game() {
             padding: '30px'
           }}>
             <h2 style={{ fontSize: '24px', marginBottom: '20px', textAlign: 'center' }}>
-              🏆 Top 10 Leaderboard
+              Top 10 Leaderboard
             </h2>
             
             {loadingLeaderboard ? (
@@ -135,14 +174,15 @@ function Game() {
                       }}
                     >
                       <td style={{ padding: '12px', fontSize: '16px' }}>
-                        {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : `#${entry.rank}`}
+                        #{entry.rank}
                       </td>
                       <td style={{ 
                         padding: '12px', 
                         fontSize: '16px',
                         fontWeight: entry.username === user?.username ? 'bold' : 'normal'
                       }}>
-                        {entry.username}
+                        {/* Display Name */}
+                        {entry.display_name || entry.username}
                         {entry.username === user?.username && ' (You)'}
                       </td>
                       <td style={{ padding: '12px', textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>
