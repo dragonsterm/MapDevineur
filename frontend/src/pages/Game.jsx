@@ -205,8 +205,7 @@ function Home() {
             © 2025 MapDevineur 
          </span>
       </div>
-
-      {/* --- MODAL LEADERBOARD (TAJAM/SHARP) --- */}
+=
       {showLeaderboardModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
            
@@ -251,8 +250,7 @@ function Home() {
                                 key={entry.rank} 
                                 className={`${entry.username === user?.username ? "bg-blue-900/10" : "hover:bg-[#111]"} transition-colors`}
                               >
-                                 <td className="py-6 px-8">
-                                    {/* HAPUS rounded-lg untuk kotak ranking tajam */}
+                                 <td className="py-6 px-8">=
                                     <div className={`font-mono font-bold text-xl flex items-center justify-center w-10 h-10 ${
                                         entry.rank === 1 ? 'bg-yellow-500/20 text-yellow-500' :
                                         entry.rank === 2 ? 'bg-gray-400/20 text-gray-300' :
