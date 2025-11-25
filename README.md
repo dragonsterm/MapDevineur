@@ -395,16 +395,7 @@ For detailed documentation, visit:
 
 **Course:** Praktikum Pemrograman Web IF-G
 **Institution:** Universitas Pembangunan Nasional "Veteran" Yogyakarta
-**Academic Year:** 2024/2025
-
-### 📝 Assignment Details
-This project was developed as a practical assignment to demonstrate:
-- Full-stack web development skills
-- Modern JavaScript framework implementation
-- RESTful API design and integration
-- Database management and optimization
-- User authentication and authorization
-- Responsive UI/UX design principles
+**Academic Year:** Ganjil 2025/2026
 
 ---
 
@@ -420,7 +411,7 @@ This project was developed as a practical assignment to demonstrate:
       <sub>Full-Stack Developer</sub>
     </td>
     <td align="center">
-      <img src="https://github.com/identicons/dimas.png" width="100px;" alt="Dimas Hafid"/>
+      <img src="https://github.com/identicons/dimashafid.png" width="100px;" alt="Dimas Hafid"/>
       <br />
       <sub><b>Dimas Hafid Fathoni</b></sub>
       <br />
