@@ -274,6 +274,19 @@
   animation: fadeIn 0.2s ease-out;
 }
 
+.edit-modal-group {
+    margin-bottom: 12px;
+}
+
+.edit-modal-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #9ca3af; 
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
 .avatar-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -468,4 +481,179 @@
     cursor: default;
     justify-content: center;
     padding: 20px;
+}
+
+.modal-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 80vh; 
+  width: 100%;
+  overflow: hidden;
+}
+
+.modal-header-sticky {
+  flex-shrink: 0;
+  background: rgba(13, 17, 23, 0.95);
+  z-index: 20;
+  padding: 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  min-height: 70px;
+}
+
+.modal-scroll-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 24px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.modal-scroll-body::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-scroll-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-scroll-body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.modal-footer-sticky {
+  flex-shrink: 0;
+  background: rgba(13, 17, 23, 0.95);
+  z-index: 20;
+  padding: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Delete */
+.delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.delete-confirm-box {
+  background: #161b22;
+  border: 1px solid #7f1d1d;
+  border-radius: 12px;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  text-align: center;
+}
+
+.delete-slider-container {
+  margin: 30px 0;
+  position: relative;
+  height: 44px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.delete-slider-track-text {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+  font-size: 12px;
+  pointer-events: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  left: 0;
+}
+
+.delete-slider-input {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 36px; 
+  background: transparent;
+  outline: none;
+  z-index: 2;
+  position: relative;
+  cursor: pointer;
+  margin: 0;
+  border-radius: 18px;
+}
+
+.delete-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #EF4444;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 18px;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  cursor: grab;
+  transition: transform 0.1s;
+  border: 2px solid #161b22;
+}
+
+.delete-slider-input::-moz-range-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #EF4444;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 18px;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  cursor: grab;
+  border: 2px solid #161b22;
+}
+
+.delete-slider-input::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+}
+
+.delete-btn-final {
+  background: #374151;
+  color: #9ca3af;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-size: 15px;
+}
+
+.delete-btn-final.active {
+  background: #DC2626;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+}
+.delete-btn-final.active:hover {
+    background: #EF4444;
 }

@@ -122,7 +122,7 @@ function UserProfile() {
             {/* Profile Details */}
             <div className="profile-header">
                 <div>
-                  <h1 style={{ color: 'white', fontSize: '28px', fontWeight: 'bold', marginBottom: '4px'}}>
+                  <h1 style={{ color: 'white', fontSize: '28px', fontWeight: 'bold', marginTop: '4px', marginBottom: '4px'}}>
                     {profile.display_name}
                     <span style={{ fontSize: '18px', color: '#8b949e', fontWeight: 'normal', marginLeft: '8px' }}>
                         #{profile.id}

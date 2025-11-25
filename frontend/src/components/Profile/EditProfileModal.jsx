@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import '../../pages/home.css';
 import '../../styles/gameProfileStyles.css';
 
-// Constants for Dropdowns
 const COUNTRIES = [
   { code: 'AF', name: 'Afghanistan' }, { code: 'AL', name: 'Albania' }, { code: 'DZ', name: 'Algeria' },
   { code: 'AR', name: 'Argentina' }, { code: 'AU', name: 'Australia' }, { code: 'AT', name: 'Austria' },
@@ -32,7 +31,6 @@ const GENDERS = [
   { value: 'female', label: 'Female' }
 ];
 
-// --- Custom Dropdown Component ---
 function CustomDropdown({ options, value, onChange, placeholder, hasSearch = false, hasFlag = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -127,7 +125,6 @@ function CustomDropdown({ options, value, onChange, placeholder, hasSearch = fal
   );
 }
 
-// --- Avatar Selection Modal ---
 function AvatarSelectionModal({ isOpen, onClose, currentAvatar, onSelect }) {
     const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar);
     const modalRef = useRef(null);
@@ -186,8 +183,68 @@ function AvatarSelectionModal({ isOpen, onClose, currentAvatar, onSelect }) {
     );
 }
 
+function DeleteConfirmationModal({ isOpen, onClose, onConfirm }) {
+    const [slideValue, setSlideValue] = useState(0);
+    const modalRef = useRef(null);
+    const isReadyToDelete = slideValue === 100;
 
-// --- Main Edit Profile Modal ---
+    useEffect(() => {
+        if (isOpen) setSlideValue(0);
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    const sliderBackground = `linear-gradient(to right, #EF4444 ${slideValue}%, rgba(255, 255, 255, 0.05) ${slideValue}%)`;
+
+    return (
+        <div className="delete-confirm-overlay">
+            <div ref={modalRef} className="delete-confirm-box">
+                <h2 style={{ color: '#EF4444', fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>
+                    Delete Account?
+                </h2>
+                <p style={{ color: '#9ca3af', marginBottom: '25px', lineHeight: '1.5' }}>
+                    This action cannot be undone. All your scores, achievements, and profile data will be permanently erased.
+                </p>
+
+                <div className="delete-slider-container">
+                     <span 
+                        className="delete-slider-track-text" 
+                        style={{ opacity: slideValue > 50 ? 0.3 : 1, transition: 'opacity 0.2s' }}
+                     >
+                        SLIDE TO DELETE
+                     </span>
+                     <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        value={slideValue} 
+                        onChange={(e) => setSlideValue(Number(e.target.value))}
+                        className="delete-slider-input"
+                        style={{ background: sliderBackground }}
+                     />
+                </div>
+
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    <button 
+                        onClick={onClose}
+                        style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        disabled={!isReadyToDelete}
+                        className={`delete-btn-final ${isReadyToDelete ? 'active' : ''}`}
+                        style={{ flex: 1 }}
+                    >
+                        DELETE
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function EditProfileModal({ isOpen, onClose, profile, onSuccess }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -199,6 +256,7 @@ function EditProfileModal({ isOpen, onClose, profile, onSuccess }) {
   });
   
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -223,123 +281,122 @@ function EditProfileModal({ isOpen, onClose, profile, onSuccess }) {
     }
   };
 
-  const handleDeleteAccount = async () => {
-      if (confirm("Are you sure you want to delete your account? This cannot be undone.")) {
-          if(confirm("Please confirm again. All your scores and data will be lost forever.")) {
-              try {
-                  await apiClient.delete('/api/game-profile');
-                  navigate('/');
-                  window.location.reload();
-              } catch (error) {
-                  console.error(error);
-                  alert("Failed to delete account");
-              }
-          }
+  const handleConfirmDelete = async () => {
+      try {
+          await apiClient.delete('/api/game-profile');
+          navigate('/');
+          window.location.reload();
+      } catch (error) {
+          console.error(error);
+          alert("Failed to delete account");
       }
   };
 
   return (
     <>
       <div className="profile-overlay" style={{ zIndex: 10000 }}>
-        {/* Added 'no-scrollbar' class to hide scrollbar */}
-        <div className="home-login-form-container no-scrollbar" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-             <h2 style={{ color: 'white', fontSize: '20px', fontWeight: 'bold' }}>Edit Profile</h2>
-             {/* Glassmorphism Close Button */}
-             <button onClick={onClose} className="glass-close-btn">✕</button>
-          </div>
+        <div className="home-login-form-container" style={{ width: '100%', maxWidth: '600px', padding: 0, background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="modal-content-wrapper">
+                <div className="modal-header-sticky">
+                    <h2 style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', margin: 0, lineHeight: 1 }}>Edit Profile</h2>
+                    <button onClick={onClose} className="glass-close-btn">✕</button>
+                </div>
+                <form 
+                    className="home-login-form" 
+                    onSubmit={handleSubmit}
+                    style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}
+                >
+                    <div className="modal-scroll-body">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', margin: '20px 0 30px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(22, 27, 34, 0.8)', padding: '5px', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
+                                <DinoSvg type={formData.avatar} style={{ width: '100%', height: '100%' }} />
+                            </div>
+                            <div>
+                                <button 
+                                    className="btn-white-solid" 
+                                    onClick={(e) => { e.preventDefault(); setShowAvatarModal(true); }}
+                                >
+                                    Change avatar
+                                </button>
+                                <div style={{ fontSize: '12px', color: '#8b949e', marginTop: '5px' }}>
+                                    Select from preset avatars
+                                </div>
+                            </div>
+                        </div>
+                        <div className="home-form-group edit-modal-group">
+                            <label>Nickname</label>
+                            <input
+                            type="text"
+                            className="home-form-input"
+                            style={{background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)'}}
+                            value={formData.display_name}
+                            onChange={(e) => setFormData({...formData, display_name: e.target.value})}
+                            required
+                            />
+                        </div>
 
-          {/* Avatar Section */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(22, 27, 34, 0.8)', padding: '5px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <DinoSvg type={formData.avatar} style={{ width: '100%', height: '100%' }} />
-              </div>
-              <div>
-                  <button 
-                      className="btn-white-solid" 
-                      onClick={(e) => { e.preventDefault(); setShowAvatarModal(true); }}
-                  >
-                      Change avatar
-                  </button>
-                  <div style={{ fontSize: '12px', color: '#8b949e', marginTop: '5px' }}>
-                    Select from preset avatars
-                  </div>
-              </div>
-          </div>
+                        <div className="home-form-group edit-modal-group">
+                            <label>Gender</label>
+                            <CustomDropdown 
+                            options={GENDERS}
+                            value={formData.gender}
+                            onChange={(val) => setFormData({...formData, gender: val})}
+                            placeholder="Select Gender"
+                            />
+                        </div>
 
-          <form className="home-login-form" onSubmit={handleSubmit}>
-              <div className="home-form-group">
-                <label>Nickname</label>
-                <input
-                  type="text"
-                  className="home-form-input"
-                  style={{background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)'}}
-                  value={formData.display_name}
-                  onChange={(e) => setFormData({...formData, display_name: e.target.value})}
-                  required
-                />
-              </div>
+                        <div className="home-form-group edit-modal-group">
+                            <label>Country</label>
+                            <CustomDropdown 
+                            options={COUNTRIES}
+                            value={formData.country}
+                            onChange={(val) => setFormData({...formData, country: val})}
+                            placeholder="Select Country"
+                            hasSearch={true}
+                            hasFlag={true}
+                            />
+                        </div>
 
-              <div className="home-form-group">
-                <label>Gender</label>
-                <CustomDropdown 
-                  options={GENDERS}
-                  value={formData.gender}
-                  onChange={(val) => setFormData({...formData, gender: val})}
-                  placeholder="Select Gender"
-                />
-              </div>
+                        <div className="home-form-group edit-modal-group" style={{ marginBottom: '20px' }}>
+                            <label>Bio</label>
+                            <textarea 
+                                className="home-form-input"
+                                rows="4"
+                                maxLength="200"
+                                placeholder="Tell us about yourself"
+                                value={formData.bio}
+                                onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                                style={{ resize: 'none', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                            />
+                            <div style={{ textAlign: 'right', fontSize: '12px', color: '#8b949e', marginTop: '4px' }}>
+                                {formData.bio.length}/200
+                            </div>
+                        </div>
+                    </div>
 
-              <div className="home-form-group">
-                <label>Country</label>
-                <CustomDropdown 
-                  options={COUNTRIES}
-                  value={formData.country}
-                  onChange={(val) => setFormData({...formData, country: val})}
-                  placeholder="Select Country"
-                  hasSearch={true}
-                  hasFlag={true}
-                />
-              </div>
+                    {/* Stick Footer */}
+                    <div className="modal-footer-sticky">
+                        <button 
+                            type="button"
+                            onClick={() => setShowDeleteModal(true)}
+                            style={{ background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                            Delete Account
+                        </button>
 
-              <div className="home-form-group">
-                  <label>Bio</label>
-                  <textarea 
-                      className="home-form-input"
-                      rows="4"
-                      maxLength="200"
-                      placeholder="Tell us about yourself"
-                      value={formData.bio}
-                      onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                      style={{ resize: 'none', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-                  />
-                  <div style={{ textAlign: 'right', fontSize: '12px', color: '#8b949e', marginTop: '4px' }}>
-                      {formData.bio.length}/200
-                  </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  <button 
-                      type="button"
-                      onClick={handleDeleteAccount}
-                      style={{ background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
-                  >
-                      Delete Account
-                  </button>
-
-                  <button
-                      type="submit"
-                      className="btn-blue-gradient"
-                      disabled={isSubmitting}
-                  >
-                      {isSubmitting ? 'Saving...' : 'Save Changes'}
-                  </button>
-              </div>
-          </form>
+                        <button
+                            type="submit"
+                            className="btn-blue-gradient"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Saving...' : 'Save Changes'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
       </div>
 
-      {/* Avatar Selection Modal Overlay */}
       <AvatarSelectionModal 
           isOpen={showAvatarModal}
           onClose={() => setShowAvatarModal(false)}
@@ -348,6 +405,12 @@ function EditProfileModal({ isOpen, onClose, profile, onSuccess }) {
               setFormData({...formData, avatar: newAvatar});
               setShowAvatarModal(false);
           }}
+      />
+
+      <DeleteConfirmationModal 
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleConfirmDelete}
       />
     </>
   );
