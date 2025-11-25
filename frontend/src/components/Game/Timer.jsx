@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 function Timer({ duration, onTimeUp, isRunning }) {
   const [timeLeft, setTimeLeft] = useState(duration);
+  const onTimeUpRef = useRef(onTimeUp);
+  
   const width = 120;
   const height = 44;
   const strokeWidth = 3;
   const radius = 20;
   
   const perimeter = (width - 2 * radius) * 2 + (2 * Math.PI * radius);
+  useEffect(() => {
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -16,7 +21,9 @@ function Timer({ duration, onTimeUp, isRunning }) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          onTimeUp();
+          if (onTimeUpRef.current) {
+            onTimeUpRef.current();
+          }
           return 0;
         }
         return prev - 1;
@@ -24,7 +31,7 @@ function Timer({ duration, onTimeUp, isRunning }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning, onTimeUp]);
+  }, [isRunning]);
 
   const isEnded = timeLeft === 0;
   const isCritical = timeLeft <= 30 && !isEnded; 

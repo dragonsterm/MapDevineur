@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import '../../styles/gameStyles.css';
 
 function RoundResult({ result, onNextRound }) {
-  const maxScore = 6000; 
+  const maxScore = 5000; 
   let progressPercentage = (result.round_score / maxScore) * 100;
 
   if (result.round_score < maxScore && progressPercentage > 98) {

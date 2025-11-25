@@ -291,9 +291,9 @@ function Home() {
             <button onClick={scrollToFAQ} className="home-nav-link">
               FAQ
             </button>
-            <button className="home-nav-link home-nav-box">
+            <Link to="/docs" className="home-nav-link home-nav-box">
               Documentation
-            </button>
+            </Link>
             <button onClick={scrollToLogin} className="home-nav-button">
               Try MapDevineur
             </button>

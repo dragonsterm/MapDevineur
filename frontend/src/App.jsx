@@ -4,6 +4,7 @@ import Test from './components/Test'
 import Home from './pages/Home'
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import Documentation from './pages/Documentation';
 import Game from './pages/Game';
 import Session from './pages/Session';
 import Registration from './pages/Registration';
@@ -33,6 +34,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/docs" element={<Documentation />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/loading" element={<Loading />} />
           <Route
@@ -56,7 +58,7 @@ function App() {
               <UserProfile />
             </ProtectedRoute>
           } />
-          
+  
           <Route path="/test" element={<Test />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
