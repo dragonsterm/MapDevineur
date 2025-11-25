@@ -3,6 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../components/test.css';
 import './home.css';
 import useAuth from '../hooks/useAuth';
+import gamePreviewImg from '../assets/Game-Screenshot.png';
+import slide1Img from '../assets/slideIMG1.png';
+import slide2Img from '../assets/slideIMG2.png';
+import slide3Img from '../assets/slideIMG3.png';
 
 function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -136,16 +140,19 @@ function Home() {
 
   const slidesContent = [
     {
-      title: "Street View Challenge",
-      description: "Immerse yourself in real-world locations captured by Google Street View"
+      title: "See The World Through Street View",
+      description: "Immerse yourself in real-world locations captured by Google Street View",
+      image: slide1Img
     },
     {
       title: "Make Your Guess",
-      description: "Drop a pin anywhere on the interactive world map"
+      description: "See how correctly you can identify locations from around the globe",
+      image: slide2Img
     },
     {
       title: "Score & Compete",
-      description: "Earn points and climb the global leaderboard"
+      description: "Earn points and climb the global leaderboard",
+      image: slide3Img
     }
   ];
   // rotate 10 sec
@@ -420,12 +427,11 @@ function Home() {
                     >
                       <div className="home-feature-slide-content">
                         <div className="home-feature-slide-image">
-                          {/* Placeholder images */}
-                          <div className="home-feature-placeholder">
-                            <span className="home-feature-placeholder-text">
-                              Feature Preview
-                            </span>
-                          </div>
+                          <img 
+                            src={slide.image} 
+                            alt={slide.title} 
+                            className="home-feature-img"
+                          />
                         </div>
                         <h3>{slide.title}</h3>
                         <p>{slide.description}</p>
@@ -472,9 +478,11 @@ function Home() {
 
           <div className="home-game-preview">
             <div className="home-game-screenshot">
-              <div className="home-game-screenshot-placeholder">
-                <span className="home-game-screenshot-text">Game Preview</span>
-              </div>
+              <img 
+                src={gamePreviewImg}
+                alt="Game Preview"
+                className="home-game-screenshot-img"
+              />
             </div>
 
             <div className="home-game-features-grid">
