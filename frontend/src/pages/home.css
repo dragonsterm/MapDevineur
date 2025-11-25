@@ -1003,6 +1003,47 @@ home-gamemode-title {
   }
 }
 
+.reset-password-pulse-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120vw; 
+  height: 120vh;
+  max-width: 1200px;
+  max-height: 1200px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(139, 92, 246, 0.05) 55%, transparent 75%);
+  border-radius: 50%;
+  animation: pulse-glow-centered 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+  -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-glow-centered {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
 @media (max-width: 1024px) {
   .home-header-nav {
     display: none;
