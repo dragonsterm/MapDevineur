@@ -6,7 +6,7 @@ import apiClient from '../services/api';
 import GameProfileModal from '../components/Profile/GameProfileModal';
 import DinoSvg from '../components/Profile/Avatars';
 import './home.css';
-import '../styles/gameProfileStyles.css'; // Import the new styles
+import '../styles/gameProfileStyles.css';
 
 function Game() {
   const { user, logout } = useAuth();
@@ -16,7 +16,7 @@ function Game() {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   
   const [gameProfile, setGameProfile] = useState(null);
-  const [showProfileModal, setShowProfileModal] = useState(false); // For creation only
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef(null);
@@ -94,7 +94,7 @@ function Game() {
   return (
     <main style={{ minHeight: '100vh', background: '#000', color: '#fff', padding: '40px 20px', position: 'relative' }}>
       
-      {/* Profile Creation Modal (First time setup) */}
+      {/* Profile Creation */}
       <GameProfileModal 
         isOpen={showProfileModal} 
         onSuccess={handleProfileCreationSuccess} 
