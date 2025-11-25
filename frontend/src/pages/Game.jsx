@@ -14,6 +14,7 @@ function Game() {
   const navigate = useNavigate();
   const [isStarting, setIsStarting] = useState(false);
   
+  // Leaderboard State
   const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -144,7 +145,6 @@ function Game() {
     <div className="test-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="test-background-glow"></div>
       
-      {/* Profile Creation Modal */}
       <GameProfileModal 
         isOpen={showProfileModal} 
         onSuccess={handleProfileCreationSuccess} 
@@ -161,7 +161,6 @@ function Game() {
           </Link>
 
           <nav className="home-header-nav">
-             {/* User Men */}
              <div style={{ position: 'relative', marginLeft: '12px' }} ref={menuRef}>
                 <div 
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -216,10 +215,9 @@ function Game() {
       <main style={{ flex: 1, paddingTop: '100px', paddingBottom: '60px', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingLeft: '24px', paddingRight: '24px' }}>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '40px', alignItems: 'start', marginBottom: '40px' }}>
-          
           <div style={{
             position: 'relative',
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(29, 78, 216, 0.2))',
+            background: 'linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(30, 58, 138, 0.4))', // Updated to a more blue-inline color
             borderRadius: '24px',
             padding: '32px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -231,7 +229,6 @@ function Game() {
             backdropFilter: 'blur(10px)',
             height: '100%'
           }}>
-            {/* Background Accent */}
             <div style={{
                 position: 'absolute',
                 top: '-50px',
@@ -337,7 +334,6 @@ function Game() {
                   fontSize: '16px', 
                   fontWeight: '700',
                   borderRadius: '12px',
-                  background: 'linear-gradient(90deg, #3B82F6 0%, #2563EB 100%)',
                   boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
                   border: 'none',
                   opacity: (isStarting || showProfileModal) ? 0.7 : 1,
@@ -477,7 +473,7 @@ function Game() {
           </div>
         </div>
 
-        {/* Useful Links Secti */}
+        {/* Useful Links Se */}
         <div style={{ 
           marginTop: '20px', 
           padding: '32px', 
@@ -508,7 +504,14 @@ function Game() {
                         border: '1px solid rgba(255, 255, 255, 0.05)', 
                         borderRadius: '12px', 
                         textDecoration: 'none',
-                        transition: 'all 0.3s ease'
+                        transition: 'opacity 0.3s ease',
+                        opacity: 1
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.7';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
                     }}
                 >
                     <div style={{ 
@@ -636,4 +639,4 @@ function Game() {
   );
 }
 
-export default Game; 
+export default Game;
