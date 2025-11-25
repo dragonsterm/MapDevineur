@@ -15,11 +15,9 @@ function Game() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   
-  // Profile State
   const [gameProfile, setGameProfile] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false); // For creation only
 
-  // Header Dropdown
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef(null);
 
