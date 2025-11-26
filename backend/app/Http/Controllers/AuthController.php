@@ -47,7 +47,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('username', 'password'))) {
             throw ValidationException::withMessages([
-                'username' => ['Wrong username or password. Forgot your password? reset it '],
+                'username' => ['Wrong username or password.'],
             ]);
         }
 
@@ -59,6 +59,48 @@ class AuthController extends Controller
                 'id' => Auth::user()->id,
                 'username' => Auth::user()->username,
             ],
+        ]);
+    }
+
+    /**
+     * Check if user exists (Step 1 of Reset Password)
+     */
+    public function checkUser(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+        ]);
+
+        $exists = User::where('username', $request->username)->exists();
+
+        if (!$exists) {
+            return response()->json([
+                'message' => 'Account not found with this username',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'User found',
+        ]);
+    }
+
+    /**
+     * Reset Password
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|exists:users,username',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::where('username', $request->username)->first();
+        
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password updated successfully',
         ]);
     }
 

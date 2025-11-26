@@ -27,6 +27,8 @@ return [
         'leaderboard/*',
         'game-profile',
         'game-profile/*',
+        'check-user', 
+        'reset-password',
     ],
 
     'allowed_methods' => ['*'],

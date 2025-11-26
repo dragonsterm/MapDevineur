@@ -1,27 +1,21 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import apiClient from '../services/api';
 import '../components/test.css';
 import './home.css';
 
 function ResetPassword() {
   const navigate = useNavigate();
-  
-  // State for flow control
-  const [step, setStep] = useState(1); // 1: Find Account, 2: Update Password
+  const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Form Data
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
-  // UI State
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // --- Handlers ---
 
   const handleFindUser = async (e) => {
     e.preventDefault();
@@ -34,19 +28,11 @@ function ResetPassword() {
 
     setIsLoading(true);
 
-    // SIMULATION: Replace this with your actual API call to check if user exists
     try {
-      // await checkUserExists(username); 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
-      
-      // Simulate logic: if username is "error", show error, else proceed
-      if (username.toLowerCase() === 'error') {
-         throw new Error('Account not found');
-      }
-
-      setStep(2); // Move to next step
+      await apiClient.post('/api/check-user', { username });
+      setStep(2);
     } catch (err) {
-      setError(err.message || 'Account not found with this username');
+      setError(err.response?.data?.message || 'Account not found with this username');
     } finally {
       setIsLoading(false);
     }
@@ -66,19 +52,30 @@ function ResetPassword() {
       return;
     }
 
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
     setIsLoading(true);
 
-    // SIMULATION: Replace with actual password update API
     try {
-      // await updatePassword(username, password);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Fake delay
+      await apiClient.post('/api/reset-password', { 
+        username, 
+        password, 
+        password_confirmation: confirmPassword 
+      });
       
       setSuccessMessage('Password updated successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/');
       }, 2000);
     } catch (err) {
-      setError('Failed to update password. Please try again.');
+      const msg = err.response?.data?.message || 'Failed to update password. Please try again.';
+      setError(msg);
+      if (err.response?.status === 404) {
+         setStep(1);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +85,7 @@ function ResetPassword() {
     <div className="test-container">
       <div className="test-background-glow"></div>
 
-      {/* Navbar - Simplified for Reset Password */}
+      {/* Navbar */}
       <header className="home-header">
         <div className="home-header-container">
           <div className="home-header-logo">
@@ -116,8 +113,6 @@ function ResetPassword() {
       >
         <div className="home-login-wrapper">
           <div className="reset-password-pulse-bg"></div>
-          
-          {/* Centered Single Panel Content */}
           <div 
             className="home-login-content" 
             style={{ 
@@ -148,7 +143,7 @@ function ResetPassword() {
 
               <form className="home-login-form" onSubmit={step === 1 ? handleFindUser : handleUpdatePassword}>
                 
-                {/* Step 1: Username Input */}
+                {/* Username Input */}
                 <div className="home-form-group">
                   <label>Username</label>
                   <input
@@ -178,7 +173,7 @@ function ResetPassword() {
                   )}
                 </div>
 
-                {/* Step 2: Password Inputs (Revealed when step === 2) */}
+                {/* Password Inputs */}
                 {step === 2 && (
                   <div style={{ animation: 'fadeIn 0.5s ease-out', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div className="home-form-group">
